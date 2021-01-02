@@ -18,25 +18,34 @@ myApp.hideIndicator();
 });
 // var $$=Jinsom;
 
-mobile_page=$.parseJSON(jinsom.mobile_page);//获取移动端开启的页面类型
-if(mobile_page){
-if(mobile_page.sns){view_sns=myApp.addView('#jinsom-view-sns',{dynamicNavbar:true,domCache:true});}
-if(mobile_page.notice){view_notice=myApp.addView('#jinsom-view-notice',{dynamicNavbar:true,domCache:true});}
-if(mobile_page.find){view_find=myApp.addView('#jinsom-view-find',{dynamicNavbar:true,domCache:true});}
-if(mobile_page.mine){view_mine=myApp.addView('#jinsom-view-mine',{dynamicNavbar:true,domCache:true});}
-if(mobile_page.bbs){view_bbs=myApp.addView('#jinsom-view-bbs',{dynamicNavbar:true,domCache:true});}
-if(mobile_page.video){view_video=myApp.addView('#jinsom-view-video',{dynamicNavbar:true,domCache:true});}
-if(mobile_page.single){view_single=myApp.addView('#jinsom-view-single',{dynamicNavbar:true,domCache:true});}
-if(mobile_page.custom_1){view_custom_1=myApp.addView('#jinsom-view-custom-1',{dynamicNavbar:true,domCache:true});}
-if(mobile_page.custom_2){view_custom_2=myApp.addView('#jinsom-view-custom-2',{dynamicNavbar:true,domCache:true});}
-if(mobile_page.custom_3){view_custom_3=myApp.addView('#jinsom-view-custom-3',{dynamicNavbar:true,domCache:true});}
+
+//强制登录
+if(jinsom.login_on_off&&!jinsom.is_login){
+myApp.loginScreen();
 }
 
 
 
+mobile_tab=$.parseJSON(jinsom.mobile_tab);//获取移动端开启的页面类型
+if(mobile_tab){
+for (var i = 0; i < mobile_tab.length; i++) {
+mobile_tab_type=mobile_tab[i].jinsom_mobile_tab_type;
+if(mobile_tab_type!='publish'){
+if(mobile_tab_type=='custom'){
+if(mobile_tab[i].jinsom_mobile_tab_custom_type!='link'){
+myApp.addView('#jinsom-view-custom-'+i,{dynamicNavbar:true,domCache:true});
+}
+}else{
+myApp.addView('#jinsom-view-'+mobile_tab_type+'-'+i,{dynamicNavbar:true,domCache:true});	
+}
+}
+}//for
+}//if
+
+
 //判断页面属性
 if(jinsom.is_single){
-window.history.pushState(null,null,'/');
+//window.history.pushState(null,null,'/');
 if(jinsom.is_bbs_post){
 function a(){
 myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/post-bbs.php?post_id='+jinsom.post_id+'&bbs_id='+jinsom.bbs_id+'&url='+jinsom.post_url+'&type=bbs'});
@@ -77,120 +86,24 @@ myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page
 }
 
 if(jinsom.is_category){
-window.history.pushState(null,null,'/');
-function h(){
 myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/bbs.php?bbs_id='+jinsom.bbs_id+'&url='+jinsom.bbs_url});
-}setTimeout(h,500);	
 }
 
 if(jinsom.is_tag){
-window.history.pushState(null,null,'/');
-function i(){
 myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/topic.php?topic_id='+jinsom.topic_id+'&url='+jinsom.topic_url});
-}setTimeout(i,500);	
 }
 
 if(jinsom.is_search){
-window.history.pushState(null,null,'/');
-function j(){
 myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/search.php?search_keywords='+jinsom.search_keywords});
-}setTimeout(j,500);	
 }
 
 
 
 
-//强制登录
-if(jinsom.login_on_off&&!jinsom.is_login){
-myApp.loginScreen();
-}
 
 
 
-//sns首页
-if(mobile_page.sns){
 
-//首页下拉刷新
-var ptrContent = $('#jinsom-view-sns .pull-to-refresh-content');
-ptrContent.on('refresh', function (e) {
-setTimeout(function (){//显示刷新成功
-$('#jinsom-view-sns .preloader').hide();
-$('#jinsom-view-sns .jinsom-refresh-success').show();
-}, 800);
-
-//下拉刷新完成
-setTimeout(function (){
-myApp.pullToRefreshDone();
-$('#jinsom-view-sns .preloader').show();
-$('#jinsom-view-sns .jinsom-refresh-success').hide();
-type=$('.jinsom-home-menu li.on').attr('data');
-jinsom_post_data(type,'pull',0,this);
-}, 1600);
-
-});
-
-
-
-//首页加载更多内容
-sns_loading = false;
-sns_page = 2;
-index_post_list=$('.jinsom-post-list');
-$('#jinsom-view-sns .infinite-scroll').on('infinite',function(){
-if(sns_loading) return;
-sns_loading = true;
-index_post_list.after(jinsom.loading_post);
-type=$('.jinsom-home-menu li.on').attr('data');
-$.ajax({
-type: "POST",
-url:  jinsom.mobile_ajax_url+"/post/data.php",
-data: {page:sns_page,type:type,load_type:'more'},
-success: function(msg){
-$('.jinsom-load-post').remove();
-if(msg==0){
-sns_loading = true; 
-}else{
-index_post_list.append(msg);
-jinsom_lightbox()
-sns_page++;
-sns_loading = false;  
-} 
-}
-});
-}); 
-
-}//sns首页
-
-
-
-//视频专题加载更多事情
-if(mobile_page.video){//如果开启专题页面
-var video_loading = false;
-var video_page = 2;
-var video_list=$('.jinsom-video-special-list');
-$('.jinsom-video-page-content.infinite-scroll').on('infinite',function(){
-if (video_loading) return;
-video_loading = true;
-video_list.after(jinsom.loading_post);
-topic=$('.jinsom-video-special-menu li.on').attr('data');
-$.ajax({
-type: "POST",
-url:  jinsom.mobile_ajax_url+"/post/video-special.php",
-data: {topic:topic,page:video_page,type:'more'},
-success: function(msg){
-if(msg==0){ 
-video_loading = true; 
-}else{
-video_list.append(msg);
-video_page++;
-video_loading = false;  
-}
-$('.jinsom-load-post').remove();
-}
-});
-
-}); 
-
-}
 
 
 
@@ -315,9 +228,9 @@ data: {post_id:post_id},
 success: function(msg){
 
 if(msg.is_like){//更新喜欢
-$('.jinsom-player-footer-btn .like i').removeClass('jinsom-xihuan2').addClass('jinsom-shiliangzhinengduixiang31');	
+$('.jinsom-player-footer-btn .like i').removeClass('jinsom-xihuan2').addClass('jinsom-xihuan1');	
 }else{
-$('.jinsom-player-footer-btn .like i').removeClass('jinsom-shiliangzhinengduixiang31').addClass('jinsom-xihuan2');		
+$('.jinsom-player-footer-btn .like i').removeClass('jinsom-xihuan1').addClass('jinsom-xihuan2');		
 }
 $('.jinsom-player-footer-btn .comment m').html(msg.comment_number);//更新评论
 
@@ -385,7 +298,9 @@ myApp.closeModal();//关闭弹窗
 // }else{
 // console.log(2);
 $.fancybox.close();//关闭灯箱 
-myApp.getCurrentView().router.back();	
+if($(' .fancybox-bg').length<=0){//不存在灯箱才返回
+myApp.getCurrentView().router.back();
+}	
 // }
 
 
@@ -396,14 +311,14 @@ myApp.getCurrentView().router.back();
 if(navigator.userAgent.indexOf("Html5Plus")<0){//非app环境
 $("body").on("click",".back", function(e){
 history.back();
-console.log(3);
+// console.log(3);
 });
 }
 
 //history.pushState(null, null, document.URL);
 
 
-document.addEventListener('plusready',function(){
+document.addEventListener('plusready',function(){//APP环境
 var webview = plus.webview.currentWebview();
 plus.key.addEventListener('backbutton', function() {
 webview.canBack(function(e) {
@@ -428,3 +343,118 @@ main && main.moveTaskToBack(false);  //后台
 });
 
 
+
+//补签
+var $$_ = function(id) {
+return "string" == typeof id ? document.getElementById(id) : id;
+};
+var Class = {
+create: function() {
+return function() {
+this.initialize.apply(this, arguments);
+}
+}
+}
+Object.extend = function(destination, source) {
+for(var property in source) {
+destination[property] = source[property];
+}
+return destination;
+}
+var Calendar = Class.create();
+Calendar.prototype = {
+initialize: function(container, options) {
+this.Container = $$_(container); //容器(table结构)
+this.Days = []; //日期对象列表
+this.SetOptions(options);
+this.Year = this.options.Year;
+this.Month = this.options.Month;
+this.qdDay = this.options.qdDay;
+this.Draw();
+},
+//设置默认属性
+SetOptions: function(options) {
+this.options = { //默认值
+Year: new Date().getFullYear(), //显示年
+Month: new Date().getMonth() + 1, //显示月
+qdDay: null,
+};
+Object.extend(this.options, options || {});
+},
+//画日历
+Draw: function() {
+//签到日期
+var day = this.qdDay;
+//日期列表
+var arr = [];
+//用当月第一天在一周中的日期值作为当月离第一天的天数
+for(var i = 1, firstDay = new Date(this.Year, this.Month - 1, 1).getDay(); i <= firstDay; i++) {
+arr.push("&nbsp;");
+}
+//用当月最后一天在一个月中的日期值作为当月的天数
+for(var i = 1, monthDay = new Date(this.Year, this.Month, 0).getDate(); i <= monthDay; i++) {
+arr.push(i);
+}
+var frag = document.createDocumentFragment();
+this.Days = [];
+while(arr.length > 0) {
+//每个星期插入一个tr
+var row = document.createElement("tr");
+//每个星期有7天
+for(var i = 1; i <= 7; i++) {
+var cell = document.createElement("td");
+
+cell.innerHTML = "<span>&nbsp;</span>";
+if(arr.length > 0) {
+var d = arr.shift();
+cell.innerHTML = "<span>" + d + "</span>";
+if(d > 0 && day.length) {
+cell.className = "no-sign";	
+$(cell).attr('onclick','jinsom_sign_add_form('+d+')');
+$(cell).attr('id','jinsom-sign-day-'+d);
+a=0;
+for(var ii = 0; ii < day.length; ii++) {
+this.Days[d] = cell;
+had_sign=this.IsSame(new Date(this.Year, this.Month - 1, d), day[ii]);//是否签到
+if(had_sign) {
+cell.className = "had-sign";
+$(cell).children('span').html(d+'<i class="jinsom-icon jinsom-dagou"></i>');
+a=1;
+}
+// console.log(1);
+
+}
+
+if(d <new Date().getDate()&&!a){
+$(cell).addClass('no').children('span').html(d+'<m>补</m>');
+}
+
+if(d ==new Date().getDate()){
+$(cell).addClass('today');
+}
+
+if(d >new Date().getDate()){
+$(cell).addClass('in');
+}
+
+
+
+
+}
+}
+row.appendChild(cell);
+}
+frag.appendChild(row);
+}
+//先清空内容再插入(ie的table不能用innerHTML)
+while(this.Container.hasChildNodes()) {
+this.Container.removeChild(this.Container.firstChild);
+}
+this.Container.appendChild(frag);
+},
+//是否签到
+IsSame: function(d1, d2) {
+d2 = new Date(d2 * 1000);
+return(d1.getFullYear() == d2.getFullYear() && d1.getMonth() == d2.getMonth() && d1.getDate() == d2.getDate());
+},
+};

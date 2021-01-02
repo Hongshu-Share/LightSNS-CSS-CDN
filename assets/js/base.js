@@ -19,6 +19,10 @@ $('.jinsom-header').removeClass('fixed');
 }
 });
 
+//右侧、个人主页左侧工具悬浮
+if($('.jinsom-bbs-content-header-fixed').length==0){
+$('.jinsom-content-right,.jinsom-member-left,.jinsom-publish-single-form .left').JinsomSidebarFixed({additionalMarginTop: 50});
+}
 
 
 //文章、帖子页面左侧栏小工具悬浮
@@ -181,7 +185,7 @@ follow='';
 if(msg.item.code==1){
 for (var i = 0; i < item_arr.length; i++) {
 type=item_arr[i].type;
-if(type=='cash'||type=='reg'||type=='post_agree'||type=='post_refuse'||type=='bbs-apply-refuse'){
+if(type=='cash'||type=='reg'||type=='order-send'||type=='secret'){
 item+='\
 <li class="clear">\
 '+item_arr[i].status+'\
@@ -259,6 +263,13 @@ $(this).children('m').remove();
 //点击通知栏内容区禁止关闭
 $(".jinsom-header-right").on("click",'.jinsom-notice ul', function(e){
 e.stopPropagation();
+});
+
+//切换表情
+$("body").on("click",'.jinsom-smile-form .header li', function(e){
+e.stopPropagation();
+$(this).addClass('on').siblings().removeClass('on');
+
 });
 
 //委派事件
@@ -412,8 +423,6 @@ SetCookie('sort',name);
 window.location.reload();
 });	
 
-//右侧、个人主页左侧工具悬浮
-$('.jinsom-content-right,.jinsom-member-left,.jinsom-publish-single-form .left').JinsomSidebarFixed({additionalMarginTop: 50});
 
 
 
@@ -532,18 +541,4 @@ setTimeout(d,1000);
 
 
 });
-
-
-//瀑布流图片预加载
-function jinsom_loadImage(url) {
-var img = new Image(); 
-img.src = url;
-if (img.complete) {
-return img.src;
-}
-img.onload = function () {
-return img.src;
-};
-};
-
 

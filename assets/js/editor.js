@@ -49,6 +49,7 @@ $('.jinsom-publish-words-bar .topic').removeClass('on');
 
 //发表动态上传图片
 if(type=='words'){
+words_images_max=jinsom.words_images_max;//最大上传数量
 status=1;
 layui.use(['upload'], function(){
 var upload = layui.upload;
@@ -56,7 +57,7 @@ upload.render({
 elem: '.jinsom-publish-words-upload',
 url: jinsom.jinsom_ajax_url+'/upload/words.php',
 multiple:true,
-number:12,
+number:words_images_max,
 accept:'file',
 before: function(obj){
 $('.jinsom-publish-words-image').show();
@@ -64,18 +65,18 @@ $('.jinsom-upload-add-icon').html('<img src="'+jinsom.admin_url+'/images/spinner
 },
 done: function(res, index, upload){
 number=$('.jinsom-publish-words-image li').length;//获取当前上传图片的数量
-if(number>12){
-status=0;
-if(status){
-$('.jinsom-upload-add-icon').html('+');	
-layer.msg('最多只能上传12张图片！');
-return false;
+
+if(number>=words_images_max-1){//如果已经上传了9张
+$('.jinsom-upload-add-icon').hide();//隐藏添加按钮
 }
-}
-if(res.code == 0){
-$('.jinsom-publish-words-image').prepend('<li><a href="'+res.pic+'" data-fancybox="publish-gallery"><img src="'+res.pic_thum+'" class="img"></a><div class="bar"><i class="jinsom-icon jinsom-fanhui2" onclick="jinsom_img_left(this)"></i><i class="jinsom-icon jinsom-bangzhujinru" onclick="jinsom_img_right(this)"></i><i class="jinsom-icon jinsom-guanbi" onclick="jinsom_remove_publish_img(this)"></i></div></li>');
+
+
+if(number<words_images_max){
+if(res.code == 1){
+$('.jinsom-publish-words-image').prepend('<li><a href="'+res.file_url+'" data-fancybox="publish-gallery"><img src="'+res.file_thum_url+'" class="img"></a><div class="bar"><i class="jinsom-icon jinsom-fanhui2" onclick="jinsom_img_left(this)"></i><i class="jinsom-icon jinsom-bangzhujinru" onclick="jinsom_img_right(this)"></i><i class="jinsom-icon jinsom-guanbi" onclick="jinsom_remove_publish_img(this)"></i></div></li>');
 }else{
 layer.msg(res.msg);	
+}
 }
 },
 allDone: function(obj){
@@ -106,7 +107,7 @@ done: function(res, index, upload){
 $('.jinsom-publish-set-video-img-upload').html('<i class="jinsom-icon jinsom-shangchuan"></i> 上传封面');
 layer.msg(res.msg);
 if(res.code == 1){
-$('#jinsom-video-img-url').val(res.url);
+$('#jinsom-video-img-url').val(res.file_url);
 }
 },
 error: function(index, upload){
@@ -453,10 +454,13 @@ return false;
 }
 
 if(post_type=='pay_see'||post_type=='vip_see'||post_type=='login_see'||post_type=='comment_see'){
+
+if($('.download-url').length==0){
 hide_content=ue_pay.getContent();
 if($.trim(hide_content)==''){
 layer.msg('隐藏内容不能为空！');
 return false; 
+}
 }
 
 if(post_type=='pay_see'){
@@ -536,6 +540,20 @@ activity_data=activity_arr.join(",");//活动数据
 data=data+'&activity-data='+activity_data;//加上活动数据
 }
 
+
+//下载
+if($('.jinsom-bbs-download-form').length>0){
+download_data='';
+$('.jinsom-bbs-download-form .li').each(function(){
+download_data+=$(this).find('.download-url').val()+'|';
+download_data+=$(this).find('.download-pass-a').val()+'|';
+download_data+=$(this).find('.download-pass-b').val()+',';
+});
+download_data=download_data.substring(0,download_data.length-1);
+data=data+'&download_data='+download_data;
+}
+
+
 if($('.jinsom-publish-words-topic.bbs span').length>0){
 topic='&topic=';
 $('.jinsom-publish-words-topic.bbs span').each(function(){
@@ -561,7 +579,9 @@ $(window).unbind('beforeunload');
 
 ue.execCommand('clearlocaldata');
 if(post_type=='pay_see'||post_type=='vip_see'||post_type=='login_see'||post_type=='comment_see'){
+if($('.download-url').length==0){
 ue_pay.execCommand('clearlocaldata');
+}
 }
 
 function d(){window.location.href=msg.url;}setTimeout(d,2000);

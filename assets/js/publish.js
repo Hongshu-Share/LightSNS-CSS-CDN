@@ -27,15 +27,15 @@ content: msg
 }
 
 //弹出对应类型的表单
-function jinsom_publish_power(type,topic_name){
+function jinsom_publish_power(type,bbs_id,topic_name){
 if(!jinsom.is_login){
 jinsom_pop_login_style();	
 return false;
 }
 layer.closeAll(); 
 
-if(type=='bbs'){
-jinsom_follow_bbs_form(topic_name);
+if(type=='follow-bbs'||type=='commend-bbs'){//推荐/关注的论坛列表
+jinsom_follow_commend_bbs_form(type,topic_name);
 return false;
 }
 
@@ -43,16 +43,25 @@ layer.load(1);
 $.ajax({
 type: "POST",
 url:jinsom.jinsom_ajax_url+"/publish/power.php",
-data:{type:type},
+data:{type:type,bbs_id:bbs_id},
 success: function(msg){
 if(msg.code==0){
 layer.closeAll('loading');
 layer.msg(msg.msg);	
 }else if(msg.code==1){
 
+if(!topic_name){
+topic_name='';
+}
+
 if(type=='single'){
 window.location.href=jinsom.member_url_permalink+'info=publish-single&topic_name='+topic_name;
 return false;
+}
+
+if(type=='bbs'){
+window.location.href=jinsom.member_url_permalink+'info=publish-bbs&bbs_id='+bbs_id+'&topic_name='+topic_name;
+return false;	
 }
 
 
@@ -160,7 +169,7 @@ done: function(res, index, upload){
 $('.jinsom-publish-set-video-img-upload').html('<i class="jinsom-icon jinsom-shangchuan"></i> 上传封面');
 layer.msg(res.msg);
 if(res.code == 1){
-$('#jinsom-video-img-url').val(res.url);
+$('#jinsom-video-img-url').val(res.file_url);
 }
 },
 error: function(index, upload){
@@ -521,6 +530,10 @@ $('.jinsom-publish-words-btn .publish').removeAttr('onclick');
 function d(){window.location.href=msg.url;}setTimeout(d,2000);
 }else if(msg.code==2){
 function d(){jinsom_update_phone_form(msg.user_id);}setTimeout(d,2000);//弹出绑定手机号
+}else if(msg.code==5){//添加话题窗口
+function c(){jinsom_publish_topic_form();}setTimeout(c,1500);
+}else if(msg.code==3){//弹窗开通会员
+function c(){jinsom_recharge_vip_form();}setTimeout(c,1500);
 }
 
 }
@@ -627,6 +640,10 @@ $('.jinsom-publish-words-btn .publish').removeAttr('onclick');
 function d(){window.location.href=msg.url;}setTimeout(d,2000);
 }else if(msg.code==2){
 function d(){jinsom_update_phone_form(msg.user_id);}setTimeout(d,2000);//弹出绑定手机号
+}else if(msg.code==5){//添加话题窗口
+function c(){jinsom_publish_topic_form();}setTimeout(c,1500);
+}else if(msg.code==3){//弹窗开通会员
+function c(){jinsom_recharge_vip_form();}setTimeout(c,1500);
 }
 
 }
@@ -673,16 +690,6 @@ layer.msg('请输入视频地址或上传视频！');
 return false;	
 }
 
-// video_ret=/^https?:\/\/\S+\.mp4|m3u8$/;
-// if (!video_ret.test(video_url)){
-// layer.msg('只支持mp4和m3u8格式的视频外链，请以http开头'); 
-// return false;
-// }  
-// video_type=jinsom_get_file_type(video_url);
-// if(video_type!='.mp4'&&video_type!='.m3u8'&&video_type!='.flv'&&video_type!='.mov'){
-// layer.msg('仅支持MP4，m3u8，flv，mov的视频格式！');
-// return false;		
-// }
 
 video_img=$('#jinsom-video-img-url').val();
 
@@ -714,6 +721,10 @@ $('.jinsom-publish-words-btn .publish').removeAttr('onclick');
 function d(){window.location.href=msg.url;}setTimeout(d,2000);
 }else if(msg.code==2){
 function d(){jinsom_update_phone_form(msg.user_id);}setTimeout(d,2000);//弹出绑定手机号
+}else if(msg.code==5){//添加话题窗口
+function c(){jinsom_publish_topic_form();}setTimeout(c,1500);
+}else if(msg.code==3){//弹窗开通会员
+function c(){jinsom_recharge_vip_form();}setTimeout(c,1500);
 }
 
 }
@@ -789,6 +800,10 @@ ue_single_pay.execCommand('clearlocaldata');
 function d(){window.location.href=msg.url;}setTimeout(d,2000);
 }else if(msg.code==2){
 function d(){jinsom_update_phone_form(msg.user_id);}setTimeout(d,2000);//弹出绑定手机号
+}else if(msg.code==5){//添加话题窗口
+function c(){jinsom_publish_topic_form();}setTimeout(c,1500);
+}else if(msg.code==3){//弹窗开通会员
+function c(){jinsom_recharge_vip_form();}setTimeout(c,1500);
 }
 
 }
@@ -797,32 +812,6 @@ function d(){jinsom_update_phone_form(msg.user_id);}setTimeout(d,2000);//弹出�
 
 }
 
-//显示发帖表单
-function jinsom_publish_bbs_form(bbs_id,topic_name){
-if(!jinsom.is_login){
-jinsom_pop_login_style();	
-return false;
-}
-layer.load(1);
-$.ajax({
-type:"POST",
-url:jinsom.jinsom_ajax_url+"/publish/bbs-type.php",
-data:{bbs_id:bbs_id},
-success: function(msg){
-layer.closeAll('loading');
-if(msg.code==1){
-child_id=$('.jinsom-bbs-header').attr('child_id');
-if(child_id!=''){
-window.location.href=jinsom.member_url_permalink+'info=publish-bbs&bbs_id='+bbs_id+'&child_bbs_id='+child_id+'&topic_name='+topic_name;
-}else{
-window.location.href=jinsom.member_url_permalink+'info=publish-bbs&bbs_id='+bbs_id+'&topic_name='+topic_name;	
-}
-}else{
-layer.msg(msg.msg);	
-}
-}
-});
-}
 
 
 //发布帖子
@@ -831,10 +820,6 @@ title= $.trim($('.jinsom-bbs-title').val());
 post_type= $('#jinsom-bbs-type').val();
 content=ue.getContent();
 
-if(title==''){
-layer.msg('标题不能为空！');
-return false;
-}
 
 if($.trim(content)==''){
 layer.msg('内容不能为空！');
@@ -842,10 +827,13 @@ return false;
 }
 
 if(post_type=='pay_see'||post_type=='vip_see'||post_type=='login_see'||post_type=='comment_see'){
+
+if($('.download-url').length==0){
 hide_content=ue_pay.getContent();
 if($.trim(hide_content)==''){
 layer.msg('隐藏内容不能为空！');
 return false; 
+}
 }
 
 if(post_type=='pay_see'){
@@ -929,6 +917,21 @@ activity_data=activity_arr.join(",");//活动数据
 data=data+'&activity-data='+activity_data;//加上活动数据
 }
 
+
+//下载
+if($('.jinsom-bbs-download-form').length>0){
+download_data='';
+$('.jinsom-bbs-download-form .li').each(function(){
+download_data+=$(this).find('.download-url').val()+'|';
+download_data+=$(this).find('.download-pass-a').val()+'|';
+download_data+=$(this).find('.download-pass-b').val()+',';
+});
+download_data=download_data.substring(0,download_data.length-1);
+data=data+'&download_data='+download_data;
+}
+
+
+
 if($('.jinsom-publish-words-topic.bbs span').length>0){
 topic='&topic=';
 $('.jinsom-publish-words-topic.bbs span').each(function(){
@@ -951,12 +954,18 @@ $('#jinsom-bbs-publish-btn').removeAttr('onclick');
 $(window).unbind('beforeunload');
 ue.execCommand('clearlocaldata');
 if(post_type=='pay_see'||post_type=='vip_see'||post_type=='login_see'||post_type=='comment_see'){
+if($('.download-url').length==0){
 ue_pay.execCommand('clearlocaldata');
+}
 }
 
 function d(){window.location.href=msg.url;}setTimeout(d,2000);
-}else if(msg.code==2){
-function d(){jinsom_update_phone_form(msg.user_id);}setTimeout(d,2000);//弹出绑定手机号
+}else if(msg.code==2){//弹出绑定手机号
+function d(){jinsom_update_phone_form(msg.user_id);}setTimeout(d,2000);
+}else if(msg.code==5){//添加话题窗口
+function c(){jinsom_publish_topic_form();}setTimeout(c,1500);
+}else if(msg.code==3){//弹窗开通会员
+function c(){jinsom_recharge_vip_form();}setTimeout(c,1500);
 }
 
 }

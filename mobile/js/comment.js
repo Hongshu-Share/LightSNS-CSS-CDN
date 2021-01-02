@@ -2,12 +2,23 @@
 //评论内容
 function jinsom_comment(post_id,ticket,randstr){
 content=$('#jinsom-comment-content-'+post_id).val();
+img='';
+img_html='';
+if($('#jinsom-publish-images-list li').length>0){
+$('#jinsom-publish-images-list li').each(function(){
+img+=$(this).children('a').attr('href')+',';
+img_html+='<a data-fancybox="gallery-new" href="'+$(this).children('a').attr('href')+'">'+$(this).children('a').html()+'</a>';
+});
+img=img.substr(0,img.length-1);
+img_html='<div class="jinsom-comment-image-list clear">'+img_html+'</div>';
+}
+
 myApp.showIndicator();
 $.ajax({
 type:"POST",
 dataType:'json',
 url:jinsom.jinsom_ajax_url+"/action/comment.php",
-data: {content:content,post_id:post_id,ticket:ticket,randstr:randstr},
+data: {content:content,post_id:post_id,ticket:ticket,randstr:randstr,img:img},
 success: function(msg){
 myApp.hideIndicator();
 comment_list=$('.jinsom-single-comment-list-'+post_id);
@@ -34,24 +45,27 @@ comment_list.prepend('\
 <div class="avatarimg">'+jinsom.avatar+jinsom.verify+'</div>\
 <div class="info">\
 <div class="name">'+jinsom.nickname+jinsom.lv+jinsom.vip+'</div>\
-<div class="from"><span>手机端</span></div>\
+<div class="from"><span class="time">刚刚</span><span>手机端</span></div>\
 </div>\
 </div>\
 <div class="content">'+msg.content+'</div>\
-<div class="footer">\
-<span class="time">刚刚</span>\
+'+img_html+'\
+<div class="footer clear">\
 <span class="comment">\
-<a href="'+jinsom.theme_url+'/mobile/templates/page/comment.php?post_id='+post_id+'&name='+jinsom.nickname_base+'" class="link"></a>\
+<a href="'+jinsom.theme_url+'/mobile/templates/page/comment.php?post_id='+post_id+'&name='+jinsom.nickname_base+'" class="link"><m></m></a>\
 </span>\
 <span class="delete" onclick="jinsom_delete_post_comments('+msg.id+',this)"></span>\
 </div>\
 </div>\
 ');
-// $('.page-on-left .page-content').animate({scrollTop:comment_list.offset().top},800);
+jinsom_lightbox();
 
 }else if(msg.code==2){//没有绑定手机号
 layer.open({content:msg.msg,skin:'msg',time:2});
 myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/setting/setting-phone.php'});
+}else if(msg.code==3){//打开开通会员页面
+layer.open({content:msg.msg,skin:'msg',time:2});
+function c(){myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/mywallet/recharge-vip.php'});}setTimeout(c,1500);
 }else{
 layer.open({content:msg.msg,skin:'msg',time:2});
 }
@@ -63,12 +77,24 @@ layer.open({content:msg.msg,skin:'msg',time:2});
 //回复帖子 一级
 function jinsom_bbs_comment(post_id,bbs_id,ticket,randstr){
 content=$('#jinsom-comment-content-'+post_id).val();
+img='';
+img_html='';
+if($('#jinsom-publish-images-list li').length>0){
+$('#jinsom-publish-images-list li').each(function(){
+img+=$(this).children('a').attr('href')+',';
+img_html+='<a data-fancybox="gallery-new" href="'+$(this).children('a').attr('href')+'">'+$(this).children('a').html()+'</a>';
+});
+img=img.substr(0,img.length-1);
+img_html='<div class="jinsom-comment-image-list clear">'+img_html+'</div>';
+}
+
+
 myApp.showIndicator();
 $.ajax({
 type:"POST",
 dataType:'json',
 url:jinsom.jinsom_ajax_url+"/action/comment-bbs.php",
-data: {content:content,post_id:post_id,bbs_id:bbs_id,type:1,ticket:ticket,randstr:randstr},
+data: {content:content,post_id:post_id,bbs_id:bbs_id,type:1,ticket:ticket,randstr:randstr,img:img},
 success: function(msg){
 myApp.hideIndicator();
 comment_list=$('.jinsom-single-comment-list-'+post_id);
@@ -89,26 +115,26 @@ comment_num.html(parseInt(comment_num.html())+1);
 $('.jinsom-post-'+post_id).next('.jinsom-single-comment').children('.header').find('span').html(parseInt(comment_num.html()));
 $('.jinsom-post-'+post_id).parent().prev().find('.number').html(parseInt(comment_num.html())+'条回帖');
 
-comment_list.append('\
+comment_list.prepend('\
 <div class="jinsom-comment-'+msg.id+'">\
 <div class="up" onclick="jinsom_comment_up('+msg.id+',this)"><i class="fa fa-thumbs-o-up"></i><m>0</m></div>\
 <div class="header clear">\
 <div class="avatarimg">'+jinsom.avatar+jinsom.verify+'</div>\
 <div class="info">\
 <div class="name">'+jinsom.nickname+jinsom.lv+jinsom.vip+'</div>\
-<div class="from"><span>手机端</span></div>\
+<div class="from"><span class="time">刚刚</span><span>手机端</span></div>\
 </div>\
 </div>\
 <div class="content">'+msg.content+'</div>\
-<div class="footer">\
-<span class="time">刚刚</span>\
+'+img_html+'\
+<div class="footer clear">\
 <span class="comment">\
 <a href="'+jinsom.theme_url+'/mobile/templates/page/comment-child-page.php?post_id='+post_id+'&comment_id='+msg.id+'&bbs_id='+bbs_id+'" class="link"><m></m></a>\
 </span>\
 </div>\
 </div>\
 ');
-// $('.page-on-left .page-content').animate({scrollTop:comment_list.offset().top},800);
+jinsom_lightbox()
 
 if($('.jinsom-tips-'+post_id).hasClass('jinsom-comment-can-see')){//回复可见
 
@@ -125,9 +151,13 @@ $('.jinsom-tips-'+post_id).removeClass('jinsom-tips').addClass('jinsom-hide-cont
 
 }
 
+
 }else if(msg.code==2){//没有绑定手机号
 layer.open({content:msg.msg,skin:'msg',time:2});
 myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/setting/setting-phone.php'});
+}else if(msg.code==3){//打开开通会员页面
+layer.open({content:msg.msg,skin:'msg',time:2});
+function c(){myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/mywallet/recharge-vip.php'});}setTimeout(c,1500);
 }else{
 layer.open({content:msg.msg,skin:'msg',time:2});
 }
@@ -171,21 +201,20 @@ $('.jinsom-comment-'+comment_id).parents('#jinsom-comment-child-page').prev().fi
 
 
 
-comment_list.append('\
+comment_list.prepend('\
 <div class="jinsom-comment-'+msg.id+'">\
 <div class="up" onclick="jinsom_comment_up('+msg.id+',this)"><i class="fa fa-thumbs-o-up"></i><m>0</m></div>\
 <div class="header clear">\
 <div class="avatarimg">'+jinsom.avatar+jinsom.verify+'</div>\
 <div class="info">\
 <div class="name">'+jinsom.nickname+jinsom.lv+jinsom.vip+'</div>\
-<div class="from"><span>手机端</span></div>\
+<div class="from"><span class="time">刚刚</span><span>手机端</span></div>\
 </div>\
 </div>\
 <div class="content">'+msg.content+'</div>\
-<div class="footer">\
-<span class="time">刚刚</span>\
+<div class="footer clear">\
 <span class="comment">\
-<a href="'+jinsom.theme_url+'/mobile/templates/page/comment-bbs-floor.php?post_id='+post_id+'&comment_id='+comment_id+'&bbs_id='+bbs_id+'&name='+jinsom.nickname_base+'" class="link"></a>\
+<a href="'+jinsom.theme_url+'/mobile/templates/page/comment-bbs-floor.php?post_id='+post_id+'&comment_id='+comment_id+'&bbs_id='+bbs_id+'&name='+jinsom.nickname_base+'" class="link"><m></m></a>\
 </span>\
 </div>\
 </div>\
@@ -195,6 +224,9 @@ comment_list.append('\
 }else if(msg.code==2){//没有绑定手机号
 layer.open({content:msg.msg,skin:'msg',time:2});
 myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/setting/setting-phone.php'});
+}else if(msg.code==3){//打开开通会员页面
+layer.open({content:msg.msg,skin:'msg',time:2});
+function c(){myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/mywallet/recharge-vip.php'});}setTimeout(c,1500);
 }else{
 layer.open({content:msg.msg,skin:'msg',time:2});
 }

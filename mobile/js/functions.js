@@ -1,31 +1,31 @@
-document.write("<script language='javascript' src='"+jinsom.cdn_url+"/mobile/js/post.js?ver=123'></script>");//文章相关
-document.write("<script language='javascript' src='"+jinsom.cdn_url+"/mobile/js/login.js'></script>");//登录相关
-document.write("<script language='javascript' src='"+jinsom.cdn_url+"/mobile/js/chat.js'></script>");//聊天相关
-document.write("<script language='javascript' src='"+jinsom.cdn_url+"/mobile/js/comment.js'></script>");//评论相关
-document.write("<script language='javascript' src='"+jinsom.cdn_url+"/mobile/js/publish.js'></script>");//发布相关
-document.write("<script language='javascript' src='"+jinsom.cdn_url+"/mobile/js/recharge.js'></script>");//发布相关
-document.write("<script language='javascript' src='"+jinsom.cdn_url+"/assets/js/jquery.fancybox.min.js'></script>");//图片灯箱
+document.write("<script type='text/javascript' src='"+jinsom.cdn_url+"/mobile/js/post.js?ver=123'></script>");//文章相关
+document.write("<script type='text/javascript' src='"+jinsom.cdn_url+"/mobile/js/login.js'></script>");//登录相关
+document.write("<script type='text/javascript' src='"+jinsom.cdn_url+"/mobile/js/chat.js'></script>");//聊天相关
+document.write("<script type='text/javascript' src='"+jinsom.cdn_url+"/mobile/js/comment.js'></script>");//评论相关
+document.write("<script type='text/javascript' src='"+jinsom.cdn_url+"/mobile/js/publish.js'></script>");//发布相关
+document.write("<script type='text/javascript' src='"+jinsom.cdn_url+"/mobile/js/recharge.js'></script>");//发布相关
+document.write("<script type='text/javascript' src='"+jinsom.cdn_url+"/assets/js/jquery.fancybox.min.js'></script>");//图片灯箱
 
 
-//置顶动态
-function jinsom_sticky_post(post_id,obj){
+//置顶内容：全局置顶==板块置顶==主页置顶==推荐==加精
+function jinsom_sticky(post_id,bbs_id,type,obj){
 layer.closeAll();
 layer.open({
-content: '你要'+$(obj).children('p').html()+'这个内容吗？'
+content: '你确定要'+$(obj).children('p').html()+'吗？'
 ,btn: ['确定', '取消']
 ,yes: function(index){
 myApp.showIndicator();
 $.ajax({
 type: "POST",
 url:  jinsom.jinsom_ajax_url+"/action/commend-post.php",
-data: {post_id:post_id,type:'sticky-post'},
+data: {post_id:post_id,bbs_id:bbs_id,type:type},
 success: function(msg){
 myApp.hideIndicator();
 layer.open({content:msg.msg,skin:'msg',time:2});
-if(msg.code==1){//置顶成功
-$(obj).html('取消置顶');
-}else if(msg.code==2){//取消置顶
-$(obj).html('置顶');
+if(msg.code==1||msg.code==2){
+$(obj).html(msg.html);
+}else if(msg.code==3){//打开开通会员页面
+function c(){myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/mywallet/recharge-vip.php'});}setTimeout(c,1500);
 }
 }
 });
@@ -33,36 +33,6 @@ layer.close(index);
 }
 });
 }
-
-
-//推荐动态
-function jinsom_commend_post(post_id,obj){
-layer.closeAll();
-layer.open({
-content: '你要'+$(obj).children('p').html()+'这个内容吗？'
-,btn: ['确定', '取消']
-,yes: function(index){
-myApp.showIndicator();
-$.ajax({
-type: "POST",
-url:  jinsom.jinsom_ajax_url+"/action/commend-post.php",
-data: {post_id:post_id,type:'commend-post'},
-success: function(msg){
-myApp.hideIndicator();
-layer.open({content:msg.msg,skin:'msg',time:2});
-if(msg.code==1){//推荐成功
-$(obj).html('取消推荐');	
-}else if(msg.code==2){//取消置顶
-$(obj).html('推荐');
-}
-}
-});
-
-layer.close(index);
-}
-});
-}
-
 
 
 
@@ -100,65 +70,6 @@ layer.close(index);
 });
 }
 
-
-
-//置顶帖子
-function jinsom_sticky_bbs_post(post_id,bbs_id,obj){
-layer.closeAll();
-layer.open({
-content: '你要'+$(obj).children('p').html()+'这个内容吗？'
-,btn: ['确定', '取消']
-,yes: function(index){
-myApp.showIndicator();
-$.ajax({
-type: "POST",
-url:  jinsom.jinsom_ajax_url+"/action/commend-post.php",
-data: {post_id:post_id,bbs_id:bbs_id,type:'sticky-bbs-post'},
-success: function(msg){
-myApp.hideIndicator();
-layer.open({content:msg.msg,skin:'msg',time:2});
-if(msg.code==1){//置顶成功
-$(obj).html('取消置顶');
-}else if(msg.code==2){//取消置顶
-$(obj).html('论坛置顶');
-}
-}
-});
-
-layer.close(index);
-}
-});
-}
-
-
-
-
-//加精帖子
-function jinsom_commend_bbs_post(post_id,bbs_id,obj){
-layer.closeAll();
-layer.open({
-content: '你要'+$(obj).children('p').html()+'这个内容吗？'
-,btn: ['确定', '取消']
-,yes: function(index){
-myApp.showIndicator();
-$.ajax({
-type: "POST",
-url:  jinsom.jinsom_ajax_url+"/action/commend-post.php",
-data: {post_id:post_id,bbs_id:bbs_id,type:'commend-bbs-post'},
-success: function(msg){
-myApp.hideIndicator();
-layer.open({content:msg.msg,skin:'msg',time:2});
-if(msg.code==1){//加精成功
-$(obj).html('取消加精');
-}else if(msg.code==2){//取消加精
-$(obj).html('加精');
-}
-}
-});
-layer.close(index);
-}
-});
-}
 
 
 //采纳答案
@@ -240,7 +151,9 @@ success: function(msg){
 myApp.hideIndicator();
 layer.open({content:msg.msg,skin:'msg',time:2});
 if(msg.code==1){//成功
-$(obj).parent('.footer').prev().html('<m class="delete"><i class="fa fa-trash"></i> 该评论内容已被删除。</m>');
+comment_dom=$(obj).parent('.footer');
+comment_dom.siblings('.jinsom-comment-image-list').remove();
+comment_dom.siblings('.content').html(msg.delete_content);
 $(obj).remove();
 }
 }
@@ -293,12 +206,12 @@ avatar=jinsom.avatar;
 
 if($(obj).children('i').hasClass('had')){
 like_num.html(parseInt(like_num.html())-1); 
-like_dom.removeClass('jinsom-shiliangzhinengduixiang31 had').addClass('jinsom-xihuan2');   
+like_dom.removeClass('jinsom-xihuan1 had').addClass('jinsom-xihuan2');   
 $('.jinsom-post-'+post_id+' .footer').next('.jinsom-post-like').children('#had_like_'+user_id).remove();
 
 }else{
 like_num.html(parseInt(like_num.html())+1); 
-like_dom.removeClass('jinsom-xihuan2').addClass('jinsom-shiliangzhinengduixiang31 had');   
+like_dom.removeClass('jinsom-xihuan2').addClass('jinsom-xihuan1 had');   
 $('.jinsom-post-'+post_id+' .footer').next('.jinsom-post-like').prepend('<a href="#" id="had_like_'+user_id+'">'+avatar+'</a>');  
 layer.open({content:'喜欢成功！',skin:'msg',time:2});
 }
@@ -306,8 +219,7 @@ layer.open({content:'喜欢成功！',skin:'msg',time:2});
 $.ajax({   
 url:jinsom.jinsom_ajax_url+"/action/like-post.php",
 type:'POST',   
-data:{post_id:post_id},    
-success:function(results){}   
+data:{post_id:post_id},
 }); 
 
 }
@@ -341,17 +253,17 @@ user_id=jinsom.user_id;
 avatar=jinsom.avatar;
 
 if($(obj).hasClass('jinsom-xihuan2')){
-$(obj).removeClass('jinsom-xihuan2').addClass('jinsom-shiliangzhinengduixiang31');
+$(obj).removeClass('jinsom-xihuan2').addClass('jinsom-xihuan1');
 
 like_num.html(parseInt(like_num.html())+1); 
-like_dom.removeClass('jinsom-xihuan2').addClass('jinsom-shiliangzhinengduixiang31 had');   
+like_dom.removeClass('jinsom-xihuan2').addClass('jinsom-xihuan1 had');   
 $('.jinsom-post-'+post_id+' .footer').next().prepend('<a href="#" id="had_like_'+user_id+'">'+avatar+'</a>'); 
 layer.open({content:'喜欢成功！',skin:'msg',time:2});
 }else{
-$(obj).removeClass('jinsom-shiliangzhinengduixiang31').addClass('jinsom-xihuan2');    
+$(obj).removeClass('jinsom-xihuan1').addClass('jinsom-xihuan2');    
 
 like_num.html(parseInt(like_num.html())-1); 
-like_dom.removeClass('jinsom-shiliangzhinengduixiang31 had').addClass('jinsom-xihuan2');   
+like_dom.removeClass('jinsom-xihuan1 had').addClass('jinsom-xihuan2');   
 $('.jinsom-post-'+post_id+' .footer').next().children('#had_like_'+user_id).remove();
 }
 
@@ -381,24 +293,115 @@ success: function(msg){
 myApp.hideIndicator();
 if(msg.code==0){//签到失败
 layer.open({content:msg.msg,skin:'msg',time:2});
-}else if(msg.code==1){//已经签到
-layer.open({content:msg.msg,skin:'msg',time:2});
+}else if(msg.code==1||msg.code==2){//已经签到|签到成功
+layer.open({
+content:'<div class="jinsom-sign-success-form">'+msg.content+'</div>'
+});
+
 $(obj).addClass('had').html(msg.text_mobile);
-$(obj).parent().prev().find('span').html(msg.day);
-$('.jinsom-mine-page .list-block li.sign .item-after').html('连续签到'+msg.day+'天');
-}else if(msg.code==2){//签到成功
-layer.open({content:msg.tip,skin:'msg',time:2});
-if(msg.msg!=''){//如果有设置奖励
-function d(){layer.open({content:msg.msg,skin:'msg',time:2});}setTimeout(d,2000);
-}
-$(obj).addClass('had').html(msg.text_mobile);
-$(obj).parent().prev().find('span').html(msg.day);
-$('.jinsom-mine-page .list-block li.sign .item-after').html('连续签到'+msg.day+'天');
+$(obj).parent().prev().find('span').html(msg.sign_c);
+month_day=parseInt($('.jinsom-sign-page-month-days span').text());
+$('.jinsom-sign-page-month-days span').html(month_day+1);
+$('.jinsom-mine-page .list-block li.sign .item-after').html('累计'+msg.sign_c+'天');
+$('.jinsom-sign-page-content tbody td.today').removeClass('no-sign').addClass('had-sign').children('span').append('<i class="jinsom-icon jinsom-dagou"></i>');
+
+
 }
 }
 });
-return false;
 }
+
+
+//补签表单
+function jinsom_sign_add_form(day){
+myApp.showIndicator();
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/stencil/sign-add.php",
+data:{day:day},
+success: function(msg){
+myApp.hideIndicator();
+layer.open({
+content:'<div class="jinsom-sign-add-form">'+msg+'</div>'
+});
+}
+});
+}
+
+//补签
+function jinsom_sign_add(day){
+myApp.showIndicator();
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/action/sign-add.php",
+data:{day:day},
+success: function(msg){
+myApp.hideIndicator();
+if(msg.code==1){
+layer.open({
+content:'<div class="jinsom-sign-success-form">'+msg.content+'</div>'
+});
+
+//前端渲染
+$('.jinsom-sign-header .left p:first-child span').text(msg.sign_c);
+$('.jinsom-mine-page .list-block li.sign .item-after').html('累计'+msg.sign_c+'天');
+$('.jinsom-sign-page-all-days span').html(msg.sign_c);
+month_day=parseInt($('.jinsom-sign-page-month-days span').text());
+$('.jinsom-sign-page-month-days span').html(month_day+1);
+$('#jinsom-sign-day-'+day).removeClass('no-sign').addClass('had-sign').children('span').html(day+'<i class="jinsom-icon jinsom-dagou"></i>');
+
+}else{
+layer.open({content:msg.msg,skin:'msg',time:2});
+}
+}
+});
+}
+
+
+//查看签到宝箱
+function jinsom_sign_treasure_form(number){
+myApp.showIndicator();
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/stencil/sign-treasure.php",
+data:{number:number},
+success: function(msg){
+myApp.hideIndicator();
+layer.open({
+content:'<div class="jinsom-sign-treasure-form">'+msg+'</div>'
+});
+}
+});	
+}
+
+
+//领取宝箱奖励
+function jinsom_sign_treasure(number,obj){
+myApp.showIndicator();
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/action/sign-treasure.php",
+data:{number:number},
+success: function(msg){
+myApp.hideIndicator();
+if(msg.code==1){
+layer.open({
+content:'<div class="jinsom-sign-success-form">'+msg.content+'</div>'
+});
+
+//前端渲染
+$(obj).addClass('had').html('已领取').removeAttr('onclick');
+}else{
+layer.open({content:msg.msg,skin:'msg',time:2});
+}
+}
+});
+}
+
+
+
+
+
 
 
 
@@ -418,13 +421,13 @@ myApp.hideIndicator();
 layer.open({content:msg.msg,skin:'msg',time:2});
 follow_dom=$('.jinsom-follow-'+author_id);
 if(msg.code==1){//取消关注
-follow_dom.removeClass('has').addClass('no');  
+follow_dom.removeClass('had').addClass('no');  
 follow_dom.html('<i class="jinsom-icon jinsom-guanzhu"></i>关注');
 }else if(msg.code==2){//关注成功
-follow_dom.removeClass('no').addClass('has');
+follow_dom.removeClass('no').addClass('had');
 follow_dom.html('<i class="jinsom-icon jinsom-yiguanzhu"></i>已关');     
 }else if(msg.code==3){//相互关注成功
-follow_dom.removeClass('no').addClass('has');
+follow_dom.removeClass('no').addClass('had');
 follow_dom.html('<i class="jinsom-icon jinsom-xianghuguanzhu"></i>互关');    
 }
 }
@@ -434,176 +437,51 @@ follow_dom.html('<i class="jinsom-icon jinsom-xianghuguanzhu"></i>互关');
 
 
 //动态播放视频
-function jinsom_play_video(post_id,obj){
-myApp.showIndicator();
-$.ajax({
-type: "POST",
-url: jinsom.mobile_ajax_url+"/post/video.php",
-data: {post_id:post_id},
-dataType:'json',
-async: false,
-success: function(msg){ 
-myApp.hideIndicator();
-myApp.popup('<div class="popup jinsom-video-pop"><div class="navbar jinsom-video-player-navbar"><div class="navbar-inner"><div class="left"><a href="#" class="link icon-only close-popup"><i class="jinsom-icon jinsom-fanhui2"></i></a></div></div></div><div id="jinsom-video"></div></div>');
+function jinsom_play_video(post_id,video_url,obj){
+$(obj).before('<div id="jinsom-video-'+post_id+'" post_id="'+post_id+'"></div>');
+$(obj).remove();
+video_type=jinsom_video_type(video_url);
+window['video_'+post_id]=new window[video_type]({
+id:'jinsom-video-'+post_id,
+url:video_url,
+'x5-video-player-type': 'h5',
+'x5-video-player-fullscreen': false,
+playbackRate: [0.5,1,2,6,8],
+fitVideoSize:'fixWidth',
+playsinline: true,
+autoplay:true,
+ignores: ['volume','pc'],
+closeVideoTouch: true,
+rotate:{
+innerRotate: true, //只旋转内部video
+clockwise: false // 旋转方向是否为顺时针
+}
+});
+window['video_'+post_id].on('play',function(){
+if($('.jinsom-video-playing').length>0){
+current_post_id=$('.jinsom-video-playing').attr('post_id');
+window['video_'+current_post_id].pause();
+}
+	
+$('#jinsom-video-'+post_id).addClass('jinsom-video-playing');
+})
+window['video_'+post_id].on('pause',function(){
+$('#jinsom-video-'+post_id).removeClass('jinsom-video-playing');
+})
+}
 
-video_type=jinsom_get_file_type(msg.url);
-if(video_type=='.m3u8'){
-player1='HlsJsPlayer';
-}else if(video_type=='.flv'){
-player1='FlvJsPlayer';
+//获取视频播放类型
+function jinsom_video_type(video_url){
+var index1=video_url.lastIndexOf(".");
+var index2=video_url.length;
+var type=video_url.substring(index1,index2);
+if(type=='.m3u8'){
+return 'HlsJsPlayer';
+}else if(type=='.flv'){
+return 'FlvJsPlayer';
 }else{
-player1='Player';	
+return 'Player';	
 }
-
-var jinsom_video = new window[player1]({
-id: 'jinsom-video',
-url: msg.url,
-fluid: true,
-autoplay: true,
-"x5-video-player-type": "h5",
-"x5-video-player-fullscreen": "true",
-enterLogo:{
-url: jinsom.video_logo,
-width: 120,
-height: 50
-},
-});
-
-
-
-navbar_height=parseInt($('.navbar').height());
-w_height=parseInt($(window).height());
-$('#jinsom-video').css({'height':w_height-navbar_height+'px','margin-top':navbar_height+'px'});
-player.pause();//先关闭音乐
-$('.jinsom-player-footer-btn .play i').removeClass('jinsom-zanting1').addClass('jinsom-bofang-');
-play_post_id=$('.jinsom-player-footer-btn .play').attr('post_id');
-$('.jinsom-music-voice-'+play_post_id).html('<i class="jinsom-icon jinsom-yuyin1"> </i> 点击播放');
-$('.jinsom-pop-music-player').hide();
-
-if(myApp.device.os!='ios'){
-jinsom_video.play();	
-}
-
-if(!msg.code){
-
-
-jinsom_video.on("timeupdate", function(){
-video_time=$('#jinsom-video .xgplayer-time span').html();
-video_time_s=video_time.split(':')[video_time.split(':').length - 1];
-video_time_m=video_time.split(':',1);
-video_time_all=parseInt(video_time_m)*60+parseInt(video_time_s);
-// console.log(video_time_all);
-if(video_time_all>=msg.time){
-// myApp.closeModal();
-jinsom_video.pause();
-jinsom_video.destroy();
-$('#jinsom-video').remove();
-// jinsom_video.fullScreen.cancel();
-// window.location.reload();
-
-if(msg.type=='pay'){
-$('.jinsom-video-pop').append('\
-<div class="page-content jinsom-video-power-content" style="top:'+navbar_height+'px;">\
-<div class="box">\
-该视频需要<span>付费购买</span>才可以观看完整版</br>\
-<a href="#" class="link" onclick="jinsom_buy_post_form('+post_id+')">付费购买</a>\
-</div>\
-</div>\
-');
-}else if(msg.type=='pass'){
-$('.jinsom-video-pop').append('\
-<div class="page-content jinsom-video-power-content" style="top:'+navbar_height+'px;">\
-<div class="box">\
-该视频需要<span>输入密码</span>才可以观看完整版</br>\
-<a href="#" class="link" onclick=\'layer.open({content:"移动端暂未开启！",skin:"msg",time:2});\'>输入密码</a>\
-</div>\
-</div>\
-');	
-}else if(msg.type=='vip'){
-$('.jinsom-video-pop').append('\
-<div class="page-content jinsom-video-power-content" style="top:'+navbar_height+'px;">\
-<div class="box">\
-该视频仅限<span>会员用户</span>才可以观看完整版</br>\
-<a href="#" class="link" onclick="myApp.closeModal();jinsom_recharge_vip_type_form();">开通会员</a>\
-</div>\
-</div>\
-');	
-}else if(msg.type=='login'){
-$('.jinsom-video-pop').append('\
-<div class="page-content jinsom-video-power-content" style="top:'+navbar_height+'px;">\
-<div class="box">\
-该视频仅限<span>登录用户</span>才可以观看完整版</br>\
-<a href="#" class="link open-login-screen" onclick="myApp.closeModal();">马上登录</a>\
-</div>\
-</div>\
-');	
-}
-
-}
-});
-
-}
-
-
-}
-});
-}
-
-//获取文件后缀
-function jinsom_get_file_type(filename){
-var index1=filename.lastIndexOf(".");
-var index2=filename.length;
-var type=filename.substring(index1,index2);
-return type;
-}
-
-
-//播放视频
-function jinsom_play_video_custom(url){
-myApp.popup('<div class="popup jinsom-video-pop"><div class="navbar jinsom-video-player-navbar"><div class="navbar-inner"><div class="left"><a href="#" class="link icon-only close-popup"><i class="jinsom-icon jinsom-fanhui2"></i></a></div></div></div><div id="jinsom-video"></div></div>');
-
-video_type=jinsom_get_file_type(url);
-if(video_type=='.m3u8'){
-player1='HlsJsPlayer';
-}else if(video_type=='.flv'){
-player1='FlvJsPlayer';
-}else{
-player1='Player';	
-}
-
-// var jinsom_video = new DPlayer({
-// element: document.getElementById('jinsom-video'),
-// screenshot:false,
-// video: {url:url}
-// });	
-
-let jinsom_video = new window[player1]({
-id: 'jinsom-video',
-url: url,
-fluid: true,
-autoplay: true,
-"x5-video-player-type": "h5",
-"x5-video-player-fullscreen": "true",
-enterLogo:{
-url: jinsom.video_logo,
-width: 120,
-height: 50
-},
-});
-
-navbar_height=parseInt($('.navbar').height());
-w_height=parseInt($(window).height());
-$('#jinsom-video').css({'height':w_height-navbar_height+'px','margin-top':navbar_height+'px'});
-player.pause();//先关闭音乐
-$('.jinsom-player-footer-btn .play i').removeClass('jinsom-zanting1').addClass('jinsom-bofang-');
-play_post_id=$('.jinsom-player-footer-btn .play').attr('post_id');
-$('.jinsom-music-voice-'+play_post_id).html('<i class="jinsom-icon jinsom-yuyin1"> </i> 点击播放');
-$('.jinsom-pop-music-player').hide();
-
-if(myApp.device.os!='ios'){
-jinsom_video.play();	
-}
-
 }
 
 
@@ -742,17 +620,21 @@ myApp.hideIndicator();
 layer.open({content:msg.msg,skin:'msg',time:2});
 if(msg.code==1){
 $(obj).removeAttr('onclick');
-$('.jinsom-video-img-'+post_id+' .tips').remove();//如果是视频则移除视频的提示。
-function c(){myApp.getCurrentView().router.back();}setTimeout(c,1500);
+function c(){window.location.href="/?p="+post_id;}setTimeout(c,1500);
+
+
+// $('.jinsom-video-img-'+post_id+' .tips').remove();//如果是视频则移除视频的提示。
+// function c(){myApp.getCurrentView().router.back();}setTimeout(c,1500);
 //将列表也同步状态
-$.ajax({
-type: "POST",
-url:jinsom.mobile_ajax_url+"/post/hide-content.php",
-data: {post_id:post_id,type:'pay'},
-success: function(msg){
-$('.jinsom-tips-'+post_id).removeClass('jinsom-tips').addClass('jinsom-hide-content').html(msg.content);
-}
-});
+// $.ajax({
+// type: "POST",
+// url:jinsom.mobile_ajax_url+"/post/hide-content.php",
+// data: {post_id:post_id,type:'pay'},
+// success: function(msg){
+// $('.jinsom-tips-'+post_id).removeClass('jinsom-tips').addClass('jinsom-hide-content').html(msg.content);
+// }
+// });
+
 }else if(msg.code==3){//弹出金币充值窗口
 myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/mywallet/recharge-credit.php'});
 }
@@ -760,6 +642,13 @@ myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page
 });    
 }
 
+function jinsom_video_password(post_id){
+if(!jinsom.is_login){
+myApp.loginScreen();  
+return false;
+}
+layer.open({content:'暂未开启！',skin:'msg',time:2});
+}
 
 //关注论坛
 function jinsom_bbs_like(bbs_id,obj){
@@ -777,18 +666,26 @@ myApp.hideIndicator();
 layer.open({content:msg.msg,skin:'msg',time:2});
 if(msg.code==1){//关注成功
 $(obj).removeClass('no').addClass('had');
-$(obj).html('<i class="jinsom-icon jinsom-yiguanzhu"></i>已关');  
+$(obj).html('<i class="jinsom-icon jinsom-yiguanzhu"></i> 已关');  
 
 html='<li id="jinsom-bbs-like-'+bbs_id+'">\
-<a href="javascript:jinsom_publish_bbs_type('+bbs_id+')" class="link">\
-<div class="img">\
+<div class="item-content">\
+<div class="item-media">\
+<a href=\'javascript:jinsom_publish_power("bbs",'+bbs_id+',"")\' class="link">\
 '+$(obj).siblings('.item-media').children('a').html()+'\
-</div>\
-<div class="name">'+$(obj).siblings('.item-inner').find('.name').text()+'</div>\
 </a>\
+</div>\
+<div class="item-inner">\
+<div class="item-title">\
+<a href=\'javascript:jinsom_publish_power("bbs",'+bbs_id+',"")\' class="link">\
+<div class="name">'+$(obj).siblings('.item-inner').find('.name').text()+'</div>\
+<div class="desc">'+$(obj).siblings('.item-inner').find('.desc').text()+'</div>\
+</a>\
+</div></div></div>\
 </li>';
+
 if($('.jinsom-bbs-like-content.publish .jinsom-empty-page').length>0){
-$('.jinsom-bbs-like-content.publish').html('<div class="jinsom-bbs-like">'+html+'</div>');
+$('.jinsom-bbs-like-content.publish').html('<div class="jinsom-chat-user-list bbs-commend list-block">'+html+'</div>');
 }else{
 $('.jinsom-bbs-like-content.publish .jinsom-bbs-like').prepend(html);
 }
@@ -796,7 +693,7 @@ $('.jinsom-bbs-like-content.publish .jinsom-bbs-like').prepend(html);
 
 }else{//取消关注
 $(obj).removeClass('had').addClass('no');  
-$(obj).html('<i class="jinsom-icon jinsom-guanzhu"></i>关注');  
+$(obj).html('<i class="jinsom-icon jinsom-guanzhu"></i> 关注');  
 
 $('#jinsom-bbs-like-'+bbs_id).remove();//移除我关注的论坛
 
@@ -969,18 +866,8 @@ myApp.actions(groups);
 
 
 //查看二维码
-function jinsom_show_user_code(){
-url=jinsom.member_url_permalink+jinsom.referral_link_name+'='+jinsom.user_id;
-// show_avatar = myApp.photoBrowser({
-// photos : ['https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+code_url],
-// //theme:'dark',
-// toolbar:false,
-// type:'popup',
-// exposition:false,
-// });
-// show_avatar.open();	
-
-
+function jinsom_show_user_code(user_id){
+url=jinsom.member_url_permalink+jinsom.referral_link_name+'='+user_id;
 html='<div class="popup jinsom-publish-type-form profile-qrcode"><div class="page-content"><div id="jinsom-qrcode"></div><p class="tips">扫码加关注我</p><div class="close"><a href="#" class="link icon-only close-popup"><i class="jinsom-icon jinsom-xiangxia2"></i></a></div>';
 myApp.popup(html);
 jinsom_qrcode('jinsom-qrcode',200,200,url);
@@ -1064,44 +951,11 @@ history.back(-1);//返回上一页
 
 
 
-//关注的论坛直接弹出论坛的发布类型
-function jinsom_publish_bbs_type(bbs_id){
-myApp.showIndicator();
-$.ajax({
-type:"POST",
-url:jinsom.mobile_ajax_url+"/publish/bbs-type.php",
-data:{bbs_id:bbs_id},
-success: function(msg){
-myApp.hideIndicator();
-if(msg=='normal'){
-jinsom_publish_bbs_form(bbs_id,'normal');	
-}else if(msg=='pay'){
-jinsom_publish_bbs_form(bbs_id,'pay');	
-}else if(msg=='comment'){
-jinsom_publish_bbs_form(bbs_id,'comment');	
-}else if(msg=='vip'){
-jinsom_publish_bbs_form(bbs_id,'vip');	
-}else if(msg=='login'){
-jinsom_publish_bbs_form(bbs_id,'login');	
-}else if(msg=='answer'){
-jinsom_publish_bbs_form(bbs_id,'answer');	
-}else if(msg=='vote'){
-jinsom_publish_bbs_form(bbs_id,'vote');	
-}else if(msg=='activity'){
-jinsom_publish_bbs_form(bbs_id,'activity');	
-}else if(msg=='no'){
-layer.open({content:'没有开启发布功能！',skin:'msg',time:2});
-}else{
-$('.jinsom-publish-bbs-type-form .bottom').html(msg);	
-myApp.popup('.jinsom-publish-bbs-type-form');
-}
-}
-});	
-}
-
 
 //搜索
 function jinsom_search(keyword){
+search_loading = false;
+search_page=2;
 keyword=$.trim(keyword);
 if(keyword==''){
 layer.open({content:'请输入搜索关键词！',skin:'msg',time:2});	
@@ -1112,37 +966,43 @@ $('.jinsom-search-tab').show();
 $('.jinsom-search-content').css({'margin-top':'10vw','background-color':'#eeeeee'});
 $('.jinsom-search-hot,.jinsom-pop-search-bbs,.jinsom-pop-search-topic').remove();
 $('#jinsom-search').val(keyword);
-list=$('.jinsom-search-post-list');
-list.html(jinsom.loading);
-$.ajax({
-type: "POST",
-url:  jinsom.mobile_ajax_url+"/post/search.php",
-data: {keyword:keyword,type:type},
-success: function(msg){
-if(msg!=0){
-list.html(msg);
-}else{
-list.html('<div class="jinsom-empty-page">没有更多内容</div>');	
-}
-}
-});	
+jinsom_search_js(keyword,type);
 }
 
 //搜索
 function jinsom_ajax_search(type,obj){
+search_loading = false;
+search_page=2;
 $(obj).addClass('on').siblings().removeClass('on');
 keyword=$.trim($('#jinsom-search').val());
 if(keyword==''){
 layer.open({content:'请输入搜索关键词！',skin:'msg',time:2});	
 return false;
 }
-list=$('.jinsom-search-post-list');
-list.html(jinsom.loading);
+$('.page-content').animate({ scrollTop: 0 },0);
 list.attr('type',type);
+
+jinsom_search_js(keyword,type);
+}
+
+
+function jinsom_search_js(keyword,type){
+
+// if(GetCookie('search-history')){
+// SetCookie('search-history',keyword);
+// }else{
+// SetCookie('search-history',keyword);
+// }
+
+
+// console.log(GetCookie('search-history'));
+
+list=$('.jinsom-search-post-list');
+list.prepend(jinsom.loading_post);
 $.ajax({
 type: "POST",
 url:  jinsom.mobile_ajax_url+"/post/search.php",
-data: {keyword:keyword,type:type},
+data: {keyword:keyword,type:type,page:1},
 success: function(msg){
 if(msg!=0){
 list.html(msg);
@@ -1151,6 +1011,38 @@ list.html('<div class="jinsom-empty-page">没有更多内容</div>');
 }
 }
 });	
+
+
+//加载更多
+search_loading = false;
+search_page=2;
+search_post_list=$('.jinsom-search-post-list');
+$('.jinsom-search-content.infinite-scroll').on('infinite',function(){
+search_type=$('.jinsom-search-tab li.on').attr('type');
+if(search_type=='user'||search_type=='forum'||search_type=='topic') return;
+if (search_loading) return;
+search_loading = true;
+search_post_list.after(jinsom.loading_post);
+keyword=$.trim($('#jinsom-search').val());
+$.ajax({
+type: "POST",
+url:  jinsom.mobile_ajax_url+"/post/search.php",
+data: {keyword:keyword,type:search_type,page:search_page},
+success: function(msg){
+if(msg!=0){
+search_post_list.append(msg);
+search_loading = false; 
+search_page++;
+}else{
+search_loading = true; 
+}
+$('.jinsom-load-post').remove();
+}
+});
+
+
+});
+
 
 }
 
@@ -1211,7 +1103,7 @@ success: function(msg){
 myApp.hideIndicator();
 layer.open({content:msg.msg,skin:'msg',time:2});
 if(msg.code==1){
-history.back(-1);//返回上一页	
+function c(){history.back(-1);}setTimeout(c,2000);
 }
 }
 });
@@ -1395,22 +1287,31 @@ layer.open({content:'复制成功！',skin:'msg',time:2});
 
 
 //切换排行榜数据
-function jinsom_leaderboard_data(type,obj){
+function jinsom_leaderboard_data(post_id,obj){
 $(obj).addClass('on').siblings().removeClass('on');
+$('.jinsom-leaderboard-content').prepend(jinsom.loading_post);
+number=$(obj).index();
 $.ajax({
 type: "POST",
 url:  jinsom.mobile_ajax_url+"/stencil/leaderboard.php",
-data: {type:type},
+data: {post_id:post_id,number:number},
 success: function(msg){	
 $('.jinsom-leaderboard-content').html(msg);
 }
 });
 }
 
-//快捷插入表情
+//快捷回复
 function jinsom_quick_reply(a,obj){
-content=$(obj).parent().next('textarea');
+content=$(obj).parent().next().children('textarea');
 content.val(content.val()+a);
+}
+
+//快捷插入表情
+function jinsom_add_smile(a,type,obj){//普通
+content=$('.jinsom-smile-textarea');
+content.val(content.val()+a);
+layer.closeAll();
 }
 
 //保释黑名单用户
@@ -1572,6 +1473,10 @@ function c(){window.location.reload();}setTimeout(c,2000);
 
 //领取任务奖励
 function jinsom_task_finish(task_id,type,obj){
+if(!jinsom.is_login){
+myApp.loginScreen();  
+return false;
+}
 myApp.showIndicator();
 $.ajax({
 type: "POST",
@@ -1582,10 +1487,8 @@ myApp.hideIndicator();
 layer.open({content:msg.msg,skin:'msg',time:2});
 if(msg.code==1){
 $(obj).addClass('had').removeClass('on').text('已领取');
-number_obj=$('.jinsom-task-form-header .header .number n');
-number=parseInt(number_obj.text());
-number_obj.text(number+1);
-$('.jinsom-mine-page .list-block li.task .item-after n').text(number+1);
+$('.jinsom-task-form-header .header .number n').text(msg.task);
+$('.jinsom-mine-page .list-block li.task .item-after n').text(msg.task);
 }
 
 }
@@ -1651,6 +1554,10 @@ window.location.reload();
 
 //付费访问论坛
 function jinsom_bbs_visit_pay(bbs_id){
+if(!jinsom.is_login){
+myApp.loginScreen();  
+return false;
+}
 layer.open({
 content: '你确定要支付吗？'
 ,btn: ['确定', '取消']
@@ -1687,44 +1594,821 @@ text:link
 });
 }
 
-
-//瀑布流图片预加载
-function jinsom_loadImage(url) {
-var img = new Image(); 
-img.src = url;
-if (img.complete) {
-return img.src;
+//打开海报页面
+function jinsom_content_playbill_page(post_id,url){
+layer.closeAll();
+myApp.getCurrentView().router.load({
+url:jinsom.theme_url+'/mobile/templates/page/playbill-content.php?post_id='+post_id,
+query:{url:url}
+});	
 }
-img.onload = function () {
-return img.src;
-};
-};
 
-//cookies
+//打开推广海报页面
+function jinsom_referral_playbill_page(url){
+layer.closeAll();
+myApp.getCurrentView().router.load({
+url:jinsom.theme_url+'/mobile/templates/page/playbill-referral.php',
+query:{url:url}
+});	
+}
+
+//直播评论互动
+function jinsom_comment_live(post_id){
+content=$.trim($('#jinsom-live-comment-content').val());
+myApp.showIndicator();
+$.ajax({
+type:"POST",
+dataType:'json',
+url:jinsom.jinsom_ajax_url+"/action/comment-live.php",
+data: {content:content,post_id:post_id},
+success: function(msg) {
+myApp.hideIndicator();
+if(msg.code==1){//成功
+$('#jinsom-live-comment-content').val('');
+comment_html='\
+<li>\
+<div class="left">'+msg.avatar+'</div>\
+<div class="right">\
+<div class="name">'+msg.nickname+'</div>\
+<div class="content">'+msg.content+'</div>\
+</div>\
+</li>\
+';
+if($('.jinsom-live-page-nav-list ul.comment-list .jinsom-empty-page').length>0){
+$('.jinsom-live-page-nav-list ul.comment-list').html(comment_html);
+}else{
+$('.jinsom-live-page-nav-list ul.comment-list').append(comment_html);
+}
+$('.jinsom-live-page-nav-list').scrollTop($('.jinsom-live-page-nav-list')[0].scrollHeight);//互动评论向下啦
+count=parseInt($('.jinsom-live-content').attr('count'));
+$('.jinsom-live-content').attr('count',count+1);
+if(ajax_get_live_comment){ajax_get_live_comment.abort();}
+jinsom_ajax_get_live_comment();
+
+}else if(msg.code==2){//没有绑定手机号
+layer.open({content:msg.msg,skin:'msg',time:2});
+function d(){myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/setting/setting-phone.php'});}setTimeout(d,2000);
+}else{
+layer.open({content:msg.msg,skin:'msg',time:2});
+}
+},
+});
+}
+
+
+//直播精彩视频切换
+function jinsom_live_jingcai_video_play(url,obj){
+$(obj).addClass('on').siblings().removeClass('on');
+if($('.jinsom-no-video-live').length>0){
+$('.jinsom-no-video-live').before('<div id="jinsom-video-live"></div>');
+$('.jinsom-no-video-live').remove();
+}
+$('#jinsom-video-live').empty();
+video_type=jinsom_video_type(url);
+new window[video_type]({
+id: 'jinsom-video-live',
+url: url,
+autoplay: true,
+playsinline: true,
+'x5-video-player-type': 'h5',
+'x5-video-player-fullscreen': false,
+});
+}
+
+//实时获取弹幕
+function jinsom_ajax_get_live_comment(){
+count=parseInt($('.jinsom-live-content').attr('count'));
+post_id=$('.jinsom-live-content').attr('post_id');
+window.ajax_get_live_comment=$.ajax({
+type: "POST",
+url:jinsom.module_url+"/action/live-comment-ajax.php",
+timeout:30000,
+dataType:'json',
+data: {count:count,post_id:post_id},
+success: function(msg){
+if(msg.code==2){
+$('.jinsom-live-page-nav-list ul.comment-list').append(msg.msg);
+$('.jinsom-live-page-nav-list').scrollTop($('.jinsom-live-page-nav-list')[0].scrollHeight);//互动评论向下啦
+$('.jinsom-live-content').attr('count',msg.count);
+jinsom_ajax_get_live_comment();
+}else if(msg.code==3){//异常
+}else{
+jinsom_ajax_get_live_comment();	
+}
+},
+error:function(XMLHttpRequest,textStatus,errorThrown){ 
+if(textStatus=="timeout"){ 
+jinsom_ajax_get_live_comment();
+} 
+} 
+});	
+}
+
+//打赏界面
+function jinsom_reward_form(post_id,type){
+if(!jinsom.is_login){
+myApp.loginScreen();  
+return false;
+}
+myApp.getCurrentView().router.loadPage(jinsom.theme_url+'/mobile/templates/page/reward.php?post_id='+post_id+'&type='+type);
+}
+
+//生成推广地址
+function jinsom_referral_url(obj){
+$(obj).append('<i class="fa fa-spinner fa-spin"></i>');
+myApp.showIndicator();
+$.ajax({
+type: "POST",
+url:jinsom.mobile_ajax_url+"/action/referral-url.php",
+success: function(msg){
+myApp.hideIndicator();
+$(obj).children('i').remove();
+layer.open({content:msg.msg,skin:'msg',time:2});
+if(msg.code==1){
+$('.jinsom-referral-url').show();
+$('#jinsom-referral-url-cover').html(msg.url);
+// $(obj).remove();
+}
+}
+});
+}
+
+
+//首页sns模块
+function jinsom_index_sns_js_load(){
+jinsom_lightbox();//图片灯箱
+
+//首页下拉刷新
+var ptrContent = $('.jinsom-sns-page-content.pull-to-refresh-content');
+ptrContent.on('refresh', function (e) {
+myApp.pullToRefreshDone();
+type=$('.jinsom-home-menu li.on').attr('type');
+jinsom_post(type,'pull',this);
+if($('[id^=jinsom-view-notice]').length>0&&jinsom.is_login){
+jinsom_index_notice_js_load();//加载消息页面
+}
+
+if($('.jinsom-mine-box li.notice').length>0){//如果我的里面开启了消息
+$.ajax({   
+url:jinsom.jinsom_ajax_url+"/action/notice-all.php",
+type:'POST',    
+success:function(msg){
+if(msg){
+$('.jinsom-mine-box li.notice .item-after,.jinsom-mine-box li.notice i,.toolbar .mine i,.navbar i.tips').html('<span class="badge bg-red tips">'+msg+'</span>');	
+$('.navbar .notice-tips').html(msg);
+}
+}
+});	
+}
+
+
+});
+
+
+
+//首页加载更多内容
+sns_loading = false;
+sns_page = 2;
+index_post_list=$('.jinsom-post-list');
+$('.jinsom-sns-page-content.infinite-scroll').on('infinite',function(){
+if(sns_loading) return;
+sns_loading = true;
+index_post_list.after(jinsom.loading_post);
+type=$('.jinsom-home-menu li.on').attr('type');
+data=$('.jinsom-home-menu li.on').attr('data');
+$.ajax({
+type: "POST",
+url:  jinsom.mobile_ajax_url+"/post/data.php",
+data: {page:sns_page,type:type,load_type:'more',data:data},
+success: function(msg){
+$('.jinsom-load-post').remove();
+if(msg==0){
+sns_loading = true; 
+}else{
+index_post_list.append(msg);
+jinsom_lightbox()
+sns_page++;
+sns_loading = false;  
+} 
+}
+});
+}); 
+}
+
+//首页消息模块
+function jinsom_index_notice_js_load(){
+$.ajax({   
+url:jinsom.mobile_ajax_url+"/stencil/notice-page.php",
+type:'POST',    
+success:function(msg){
+$('.jinsom-chat').html(msg);
+
+notice=0;
+$(".jinsom-chat .tips").each(function(){
+if($(this).text()){
+notice+=parseInt($(this).text());
+}
+});
+if(notice){
+$('.toolbar .notice i').html('<span class="badge bg-red tips">'+notice+'</span>');
+}
+
+$('.jinsom-chat-notice li').click(function(event){//消除红点
+all_notice=parseInt($('.toolbar .tips').text());
+if(all_notice){
+current_notice=parseInt($(this).children('.tips').text());
+number=all_notice-current_notice;
+if(number){
+$('.toolbar .tips').text(number);
+}else{
+$('.toolbar .tips').remove();
+}
+}
+$(this).children('.tips').remove();
+});
+
+}
+});
+}
+
+//视频专题后加载js
+function jinsom_index_video_special_js_load(obj){
+var video_loading = false;
+var video_page = 2;
+$(obj+' .infinite-scroll').on('infinite',function(){
+if (video_loading) return;
+video_loading = true;
+
+video_list=$(obj+' .jinsom-video-special-list');
+number=video_list.attr('number');
+video_list.after(jinsom.loading_post);
+topic=$('.jinsom-video-special-menu li.on').attr('data');
+$.ajax({
+type: "POST",
+url:  jinsom.mobile_ajax_url+"/post/video-special.php",
+data: {topic:topic,page:video_page,number:number,type:'more'},
+success: function(msg){
+if(msg==0){ 
+video_list.append('<div class="jinsom-empty-page">没有更多内容</div>'); 
+video_loading = true; 
+}else{
+video_list.append(msg);
+video_page++;
+video_loading = false;  
+}
+$('.jinsom-load-post').remove();
+}
+});
+
+}); 
+}
+
+
+
+//点击广告
+function jinsom_click_ad(){
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/action/click-ad.php",
+});	
+}
+
+//出售宠物
+function jinsom_pet_sell(id,number,obj,ticket,randstr){
+myApp.showIndicator();
+$.ajax({   
+url:jinsom.mobile_ajax_url+"/action/pet.php",
+type:'POST',    
+data:{id:id,type:'sell',ticket:ticket,randstr:randstr},
+success:function(msg){
+myApp.hideIndicator();
+layer.open({content:msg.msg,skin:'msg',time:2});
+
+if(msg.code==1){
+$(obj).after('<div class="jinsom-pet-nest-btn" onclick="jinsom_pet_store('+number+')">'+msg.text+'</div>').remove();
+$('.jinsom-pet-content.mine .jinsom-pet-nest-list li').eq(number).find('.pet_img').remove();
+$('.jinsom-pet-content.mine .jinsom-pet-nest-list li').eq(number).find('.green').text(msg.text);
+$('.jinsom-pet-nest-list.single .pet_img').remove();
+$('.navbar-on-center .center').text('');
+}
+
+}
+});
+}
+
+//偷宠物
+function jinsom_pet_steal(id,number,obj,ticket,randstr){
+if(!jinsom.is_login){
+myApp.loginScreen();  
+return false;
+}
+myApp.showIndicator();
+$.ajax({   
+url:jinsom.mobile_ajax_url+"/action/pet.php",
+type:'POST',    
+data:{id:id,type:'steal',ticket:ticket,randstr:randstr},
+success:function(msg){
+myApp.hideIndicator();
+layer.open({content:msg.msg,skin:'msg',time:2});
+
+if(msg.code==1){
+$(obj).remove();
+$('.jinsom-pet-content.other .jinsom-pet-nest-list li').eq(number).find('.pet_img').remove();
+$('.jinsom-pet-content.other .jinsom-pet-nest-list li').eq(number).find('.green').text(msg.text);
+$('.jinsom-pet-content.other .jinsom-pet-nest-list li').eq(number).children('a').removeAttr('href');
+$('.jinsom-pet-nest-list.single .pet_img').remove();
+$('.jinsom-pet-nest-list.single li .nest p').text(msg.text).addClass('green');
+// function d(){history.back(-1);}setTimeout(d,1500);
+}
+
+}
+});
+}
+
+
+
+//购买窝、解锁窝
+function jinsom_pet_buy_nest(number,obj){
+myApp.showIndicator();
+$.ajax({   
+url:jinsom.mobile_ajax_url+"/action/pet.php",
+type:'POST',    
+data:{number:number,type:'deblocking'},
+success:function(msg){
+myApp.hideIndicator();
+layer.open({content:msg.msg,skin:'msg',time:2});
+if(msg.code==1){
+$(obj).after('<div class="jinsom-pet-nest-btn" onclick="jinsom_pet_store('+number+')">'+msg.text+'</div>').remove();
+$('.jinsom-pet-content.mine .jinsom-pet-nest-list li').eq(number).removeClass('gray');
+$('.jinsom-pet-content.mine .jinsom-pet-nest-list li').eq(number).find('.no').text(msg.text).addClass('green');
+$('.jinsom-pet-nest-list.single li').removeClass('gray');
+}
+
+}
+});
+}
+
+//购买宠物蛋
+function jinsom_pet_buy(number,iiii){
+if(!jinsom.is_login){
+myApp.loginScreen();  
+return false;
+}
+myApp.showIndicator();
+$.ajax({   
+url:jinsom.mobile_ajax_url+"/action/pet.php",
+type:'POST',    
+data:{number:number,iiii:iiii,type:'buy'},
+success:function(msg){
+myApp.hideIndicator();
+layer.open({content:msg.msg,skin:'msg',time:2});
+if(msg.code==1){
+$('.jinsom-pet-nest-btn').remove();
+$('.jinsom-pet-nest-list.single li .animal').html('<img class="egg_img" src="'+msg.img_egg+'">');
+$('.jinsom-pet-content.mine .jinsom-pet-nest-list li').eq(number).find('.animal').html('<img class="egg_img" src="'+msg.img_egg+'">');
+$('.jinsom-pet-nest-list.single li .nest').append('<p>'+msg.text+' '+msg.hatch_time+'</p>');
+$('.jinsom-pet-content.mine .jinsom-pet-nest-list li').eq(number).find('.green').text(msg.text+' '+msg.hatch_time).removeClass('green');
+$('.navbar-on-center').prev().children('.center').text(msg.pet_name);
+function d(){history.back(-1);}setTimeout(d,1500);
+}
+
+}
+});	
+}
+
+//打开商店界面
+function jinsom_pet_store(number){
+myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/pet-store.php?number='+number});	
+}
+
+
+
+//收藏内容
+function jinsom_collect(post_id,type,obj){
+if(!jinsom.is_login){
+myApp.loginScreen();  
+return false;
+}
+if(type=='img'){
+url=$(obj).parent().siblings('.fancybox-stage').find('img').attr('src');
+}else{
+url='';	
+}
+
+if($(obj).children('i').hasClass('jinsom-shoucang')){
+$(obj).children('i').addClass('jinsom-shoucang1').removeClass('jinsom-shoucang');
+$(obj).children('p').text($(obj).attr('a'));
+}else{
+$(obj).children('i').addClass('jinsom-shoucang').removeClass('jinsom-shoucang1');
+$(obj).children('p').text($(obj).attr('b'));
+}
+$.ajax({   
+url:jinsom.jinsom_ajax_url+"/action/collect.php",
+type:'POST',   
+data:{post_id:post_id,type:type,url:url},  
+}); 
+}
+
+
+//图片灯箱
+function jinsom_lightbox(){
+$("[data-fancybox]").fancybox({
+// loop : true,
+arrows : false,
+protect:false,
+buttons : ['collect','download','thumbs','close'],
+btnTpl: {
+collect:
+'<a  onclick=\'jinsom_collect("","img",this)\' class="fancybox-button fancybox-button--collect" href="javascript:;"><i class="jinsom-icon jinsom-shoucang1"></i></a>'
+},
+mobile:{
+clickSlide: function(current, event){
+return "close";
+},
+clickContent: function(current, event){
+return "close";
+},
+},
+hash:false,
+afterShow: function(instance,current){
+window.history.pushState(null,null,'/?lightbox&r='+Math.random().toString(36).substr(2,5));
+// console.log($.fancybox.getInstance().current.src);
+
+$.ajax({   
+url:jinsom.jinsom_ajax_url+"/action/collect-is.php",
+type:'POST',   
+data:{url:$.fancybox.getInstance().current.src}, 
+success:function(msg){ 
+if(msg.code==1){
+$('.fancybox-button--collect i').addClass('jinsom-shoucang').removeClass('jinsom-shoucang1');
+}else{
+$('.fancybox-button--collect i').addClass('jinsom-shoucang1').removeClass('jinsom-shoucang');	
+}
+} 
+}); 
+
+
+},
+});	
+}
+
+
+//评论置顶
+function jinsom_up_comment(comment_id,bbs_id,obj){
+title=$(obj).text();
+layer.open({
+content: '你确定要'+title+'吗？'
+,btn: ['确定', '取消']
+,yes: function(index){
+myApp.showIndicator();
+$.ajax({
+type: "POST",
+dataType:'json',
+url:  jinsom.jinsom_ajax_url+"/action/up-comment.php",
+data: {comment_id:comment_id,bbs_id:bbs_id},
+success: function(msg){
+myApp.hideIndicator();
+layer.open({content:msg.msg,skin:'msg',time:2});
+$(obj).text(msg.name);
+$(obj).parents('.jinsom-single-comment-list').find('.up-comment').remove();	
+if(msg.code==1){//成功
+$(obj).parents('.jinsom-comment-li').find('.from').prepend('<span class="up-comment">'+title+'</span>');
+$(obj).parents('.jinsom-single-comment-list').prepend($(obj).parents('.jinsom-comment-li'));
+$(obj).parents('.jinsom-comment-li').siblings().find('.comment-up').text(title);
+}
+}
+});
+}
+}); 
+}
+
+
+//表情
+function jinsom_smile_form(obj){
+layer.open({
+type: 1,
+content: $(obj).next().html(),
+anim: 'up',
+style: 'position:fixed;bottom:0;left:0;width:100%;height:65vw;border:none;'
+});	
+$('.jinsom-smile-form .header li').click(function(){
+$(this).addClass('on').siblings().removeClass('on');
+$(this).parent().next().children('ul').eq($(this).index()).show().siblings().hide();
+});
+}
+
+//发布权限
+function jinsom_publish_power_form(){
+layer.open({
+type: 1,
+content: $('.jinsom-publish-power-list-form').html(),
+anim: 'up',
+style: 'position:fixed;bottom:0;left:0;width:100%;border:none;'
+});	
+}
+
+
+//排序
+function jinsom_sort(){
+type=$('.jinsom-home-menu li.on').attr('type');//当前内容的类型
+sort_type=GetCookie('sort');
+buttons=[
+{text:'最新发布',onClick:function(){SetCookie('sort','normal');jinsom_post(type,'reload',this);}},
+{text:'最新回复',onClick:function(){SetCookie('sort','comment');jinsom_post(type,'reload',this);}},
+{text:'随机内容',onClick:function(){SetCookie('sort','rand');jinsom_post(type,'reload',this);}},
+{text:'本月热门',onClick:function(){SetCookie('sort','comment_count_month');jinsom_post(type,'reload',this);}},
+{text:'所有热门',onClick:function(){SetCookie('sort','comment_count');jinsom_post(type,'reload',this);}},
+{text:'取消',color: 'red'},
+];
+if(sort_type=='comment'){
+buttons[1]['bold']=true;	
+}else if(sort_type=='rand'){
+buttons[2]['bold']=true;	
+}else if(sort_type=='comment_count_month'){
+buttons[3]['bold']=true;	
+}else if(sort_type=='comment_count'){
+buttons[4]['bold']=true;	
+}else{
+buttons[0]['bold']=true;
+}
+myApp.actions(buttons);
+}
+
+//评论排序
+function jinsom_comment_sort(){
+sort_type=GetCookie('comment_sort');
+buttons=[
+{text:'正序',onClick:function(){
+SetCookie('comment_sort','DESC');
+dom='.page-on-center .jinsom-single-comment-list';
+jinsom_comment_data(1,$(dom).attr('post_id'),$(dom).attr('type'),$(dom).attr('bbs_id'),dom);
+$('.jinsom-single-comment>.header .sort span').text('正序');
+}},
+{text:'倒序',onClick:function(){
+SetCookie('comment_sort','ASC');
+dom='.page-on-center .jinsom-single-comment-list';
+jinsom_comment_data(1,$(dom).attr('post_id'),$(dom).attr('type'),$(dom).attr('bbs_id'),dom);
+$('.jinsom-single-comment>.header .sort span').text('倒序');
+}},
+{text:'取消',color: 'red'},
+];
+if(sort_type=='ASC'){
+buttons[1]['bold']=true;	
+}else{
+buttons[0]['bold']=true;
+}
+myApp.actions(buttons);
+}
+
+//返回顶部
+function jinsom_totop(){
+current=myApp.getCurrentView().selector;
+if($(current+' .page-on-center').length>0){
+$('.page-on-center .page-content').animate({scrollTop:0},500);
+}else{
+$(current+' .page-content').animate({scrollTop:0},500);
+}	
+}
+
+//收起/展开右侧悬浮按钮
+function jinsom_hide_right_bar(){
+if($('.jinsom-right-bar').hasClass('hidden')){
+$('.jinsom-right-bar').removeClass('hidden');
+$('.jinsom-right-bar li.close').siblings().show();
+number=$('.jinsom-right-bar li').length;
+height=(number-1)*17-5;
+$('.jinsom-right-bar').css('height',height+'vw');
+$('.jinsom-right-bar li.close i').addClass('jinsom-guanbi').removeClass('jinsom-mulu1');
+}else{
+$('.jinsom-right-bar').addClass('hidden');
+$('.jinsom-right-bar li.close').siblings().hide();	
+$('.jinsom-right-bar').css('height','5vw');
+$('.jinsom-right-bar li.close i').removeClass('jinsom-guanbi').addClass('jinsom-mulu1');
+}
+$('.jinsom-right-bar li.music').hide();
+}
+
+
+//喜欢秘密
+function jinsom_like_secret(post_id,obj){
+if(!jinsom.is_login){
+myApp.loginScreen();  
+return false;
+}
+
+if(!$(obj).hasClass('had')){
+$(obj).addClass('had');
+like_num=parseInt($(obj).children('n').text())+1;
+$(obj).children('n').text(like_num);
+$.ajax({
+type: "POST",
+dataType:'json',
+url:  jinsom.mobile_ajax_url+"/action/secret.php",
+data: {post_id:post_id,type:'like'},
+});
+}
+}
+
+//删除秘密
+function jinsom_delete_secret(post_id){
+layer.closeAll();
+layer.open({
+content: '你确定要删除吗？'
+,btn: ['确定', '取消']
+,yes: function(index){
+myApp.showIndicator();
+$.ajax({
+type:"POST",
+url:jinsom.mobile_ajax_url+"/action/secret.php",
+data:{post_id:post_id,type:'delete'},
+success: function(msg){
+myApp.hideIndicator();
+layer.open({content:msg.msg,skin:'msg',time:2});
+if(msg.code==1){
+history.back(-1);	
+$('#jinsom-secret-'+post_id).fadeTo("slow",0.06, function(){
+$(this).slideUp(0.06, function(){
+$(this).remove();
+});
+});
+
+}
+}
+});
+
+layer.close(index);
+}
+});
+}
+
+//评论私密
+function jinsom_secret_comment(){
+post_id=$('.jinsom-post-secret-list.single').attr('data');
+content=$('#jinsom-secret-comment-content').val();
+myApp.showIndicator();
+$.ajax({
+type:"POST",
+url:jinsom.mobile_ajax_url+"/action/secret.php",
+data:{post_id:post_id,content:content,type:'comment'},
+success: function(msg){
+myApp.hideIndicator();
+layer.open({content:msg.msg,skin:'msg',time:2});
+if(msg.code==1){
+$('#jinsom-secret-comment-content').val('');
+$('.jinsom-secret-comment-list').prepend(msg.html);
+
+}
+}
+});
+}
+
+//删除秘密评论
+function jinsom_secret_comment_delete(comment_id){
+layer.closeAll();
+layer.open({
+content: '你确定要删除吗？'
+,btn: ['确定', '取消']
+,yes: function(index){
+	
+post_id=$('.jinsom-post-secret-list.single').attr('data');
+myApp.showIndicator();
+$.ajax({
+type:"POST",
+url:jinsom.mobile_ajax_url+"/action/secret.php",
+data:{comment_id:comment_id,post_id:post_id,type:'comment-delete'},
+success: function(msg){
+myApp.hideIndicator();
+layer.open({content:msg.msg,skin:'msg',time:2});
+if(msg.code==1){
+$('#jinsom-secret-comment-'+comment_id).fadeTo("slow",0.06, function(){
+$(this).slideUp(0.06, function(){
+$(this).remove();
+});
+});
+}
+}
+});
+layer.close(index);
+}
+});
+}
+
+
+//打开页面
+function jinsom_is_page_repeat(page_name,url){
+if($('.pages [data-page='+page_name+']').length>0){
+history.back(-1);
+}else{
+myApp.getCurrentView().router.load({url:url});
+}
+}
+
+
+/*
+加载评论
+page：页数
+post_id：文章id
+type：如果是帖子填：bbs，否则留空
+bbs_id：论坛ID
+dom：列表dom
+ */
+function jinsom_comment_data(page,post_id,type,bbs_id,dom){
+$(dom).prepend(jinsom.loading_post);
+comment_loading=false;
+comment_page=2;
+$.ajax({
+type: "POST",
+url:  jinsom.mobile_ajax_url+"/post/comment.php",
+data: {page:page,post_id:post_id,type:type,bbs_id:bbs_id},
+success: function(msg){
+$('.jinsom-load-post').remove();
+if(msg==0){
+$(dom).html(jinsom.empty); 
+}else{
+$(dom).html(msg); 
+jinsom_lightbox();//灯箱
+} 
+}
+});	
+}
+
+
+//iframe弹窗
+function jinsom_popup_iframe(url){
+var popuphtml='<div class="jinsom-iframe-popup popup">'+
+'<div class="navbar">'+
+'<div class="navbar-inner">'+
+'<div class="left">'+
+'<a href="#" class="link icon-only close-popup"><i class="jinsom-icon jinsom-xiangxia2"></i></a></div>'+
+'<div class="center"></div>'+
+'<div class="right"><a href="#" class="link icon-only"></a></div>'+
+'</div>'+
+'</div>'+
+'<iframe src='+url+' style="width:100%;height:100vh;border:none;"></iframe>'+
+'</div>'
+myApp.popup(popuphtml);
+}
+
+//清除阅读历史记录
+function jinsom_history_single_clear(obj){
+layer.open({
+content: '你确定要清空吗？'
+,btn: ['确定', '取消']
+,yes: function(index){
+$('.jinsom-history-single-content').html(jinsom.empty);
+layer.open({content:'已经清空！',skin:'msg',time:2});
+DelCookie('history_single');
+$(obj).text('').removeAttr('onclick');
+}
+});	
+}
+
+//下载次数
+function jinsom_download_times(post_id){
+$.ajax({   
+url:jinsom.jinsom_ajax_url+"/action/download-times.php",
+type:'POST',   
+data:{post_id:post_id},  
+}); 
+}
+
+//申请论坛
+function jinsom_apply_bbs(){
+title=$('#jinsom-apply-bbs-title').val();
+reason=$('#jinsom-apply-bbs-reason').val();
+myApp.showIndicator();
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/action/apply-bbs.php",
+data:{title:title,reason:reason},
+success: function(msg){
+myApp.hideIndicator();
+layer.open({content:msg.msg,skin:'msg',time:2});
+if(msg.code==1){
+$('#jinsom-apply-bbs-title,#jinsom-apply-bbs-reason').val('');
+}
+}
+});
+}
+
+//设置cookie
 function SetCookie(name,value){
-var argv=SetCookie.arguments;
-var argc=SetCookie.arguments.length;
-var expires=(2<argc)?argv[2]:null;
-var path=(3<argc)?argv[3]:null;
-var domain=(4<argc)?argv[4]:null;
-var secure=(5<argc)?argv[5]:false;
-document.cookie=name+"="+escape(value)+((expires==null)?"":("; expires="+expires.toGMTString()))+((path==null)?"":("; path="+path))+((domain==null)?"":("; domain="+domain))+((secure==true)?"; secure":"");
+var Days = 30*12*10;//十年
+var exp = new Date();
+exp.setTime(exp.getTime() + Days*24*60*60*1000);
+document.cookie = name + "="+ escape (value) + ";expires=" + exp.toGMTString();
 }
-function GetCookie(Name) {
-var search = Name + "=";
-var returnvalue = "";
-if (document.cookie.length > 0) {
-offset = document.cookie.indexOf(search);
-if (offset != -1) {      
-offset += search.length;
-end = document.cookie.indexOf(";", offset);                        
-if (end == -1)
- end = document.cookie.length;
-returnvalue=unescape(document.cookie.substring(offset,end));
+
+//获取cookie
+function GetCookie(name){
+var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+if(arr=document.cookie.match(reg)){
+return unescape(arr[2]);
+}else{
+return null;
 }
 }
-return returnvalue;
-}
+
 //删除cookie
 function DelCookie(name){
 var exp = new Date();
@@ -1734,3 +2418,6 @@ if(cval!=null){
 document.cookie= name + "="+cval+";expires="+exp.toGMTString();
 } 
 }
+
+
+

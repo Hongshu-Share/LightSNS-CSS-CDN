@@ -80,12 +80,12 @@ $("input[name='jinsom_options[jinsom_panel_name]']").bind("input propertychange"
 $('.jinsom-panel-header-inner h1').html($(this).val());
 });
 
+//获取最新版本提示
 layui.use(['layer'], function() {
 $("#jinsom-get-update-info").click(function() {
 layer.load(1);
-var my_domain = document.domain;
-var url = jinsom.author_update + "/update.php?callback=?&url=123";
-jQuery.getJSON(url, function(data) {
+url=jinsom.update_url+"/update.php?callback=?&url=123";
+jQuery.getJSON(url,function(data) {
 layer.closeAll('loading');
 layer.alert(data.version)
 })
@@ -190,7 +190,7 @@ function c(){window.location.reload();}setTimeout(c,2000);
 
 
 //保存设置
-function jinsom_admin_save_setting(){
+function jinsom_admin_save_setting(tips){
 data=$('#jinsom-panel-form').serializeJSONLightSNS();
 layer.load(1);
 $.ajax({
@@ -199,9 +199,8 @@ url: jinsom.jinsom_ajax_url+"/admin/action/admin-save.php",
 data:{data:data},
 success: function(msg){
 layer.closeAll('loading');
+if(tips){
 layer.msg(msg.msg);
-if(msg.code==1){
-
 }
 }
 });
@@ -237,7 +236,7 @@ layer.closeAll('loading');
 window.admin_key_add_form=layer.open({
 title:'卡密生成',
 type: 1,
-area: ['540px', '340px'], 
+area: ['540px', '368px'], 
 content: msg
 });
 layui.use(['form','laydate'], function () {
@@ -329,7 +328,7 @@ layer.closeAll('loading');
 window.admin_key_add_form=layer.open({
 title:'卡密导出',
 type: 1,
-area: ['640px', '305px'], 
+area: ['640px', '330px'], 
 content: msg
 });
 layui.use(['form'], function () {
@@ -366,7 +365,7 @@ layer.closeAll('loading');
 window.admin_key_add_form=layer.open({
 title:'卡密删除',
 type: 1,
-area: ['630px', '215px'], 
+area: ['630px', '240px'], 
 content: msg
 });
 layui.use(['form'], function () {
@@ -779,19 +778,7 @@ content: msg.msg
 });
 }
 
-//自助授权
-function jinsom_custom_verify_domain(){
-layer.load(1);
-$.ajax({
-type: "POST",
-url:"https://admin.jinsom.cn/verify.php",
-data:{domain:jinsom.domain,theme:jinsom.theme_name},
-success: function(msg){
-layer.closeAll('loading');
-layer.msg(msg.msg);
-}
-});	
-}
+
 
 //弹出提现记录表单
 function jinsom_admin_cash_form(){
@@ -1068,10 +1055,30 @@ content: msg
 
 //版主申请操作
 function jinsom_admin_apply_bbs_admin_do(type,id,obj){
+
+if(type=='refuse'){//拒绝
+layer.prompt({title: '请输入拒绝通过的原因', formType: 2},function(reason,index){
+layer.load(1);
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/admin/action/apply-bbs-admin-do.php",
+data:{ID:id,type:type,reason:reason},
+success: function(msg){
+layer.closeAll('loading');
+layer.msg(msg.msg);
+if(msg.code==1){
+$('#jinsom-admin-apply-bbs-admin-'+id+' span m').html('已经拒绝').attr('style','');
+layer.close(index);
+layer.close(admin_apply_bbs_admin_read_form);
+}
+}
+});
+});
+}else{//删除或通过
+
+
 if(type=='agree'){
 title="通过";
-}else if(type=='refuse'){
-title="拒绝";
 }else{
 title="删除";	
 }
@@ -1095,14 +1102,16 @@ if(type=='del'){
 $('#jinsom-admin-apply-bbs-admin-'+id).remove();
 }else if(type=='agree'){
 $('#jinsom-admin-apply-bbs-admin-'+id+' span m').html('已经通过').attr('style','');
-}else if(type=='refuse'){
-$('#jinsom-admin-apply-bbs-admin-'+id+' span m').html('已经拒绝').attr('style','');
 }
 layer.close(admin_apply_bbs_admin_read_form);
 }
 }
 });	
 });	
+
+
+}
+
 }
 
 
@@ -1115,7 +1124,7 @@ url:jinsom.jinsom_ajax_url+"/admin/stencil/apply-bbs.php",
 success: function(msg){
 layer.closeAll('loading');
 layer.open({
-title:'论坛开通申请',
+title:jinsom.bbs_name+'申请开通',
 type: 1,
 fixed: false,
 area: ['700px','410px'], 
@@ -1147,10 +1156,30 @@ content: msg
 
 //论坛申请操作
 function jinsom_admin_apply_bbs_do(type,id,obj){
+
+if(type=='refuse'){//拒绝
+layer.prompt({title: '请输入拒绝通过的原因', formType: 2},function(reason,index){
+layer.load(1);
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/admin/action/apply-bbs-do.php",
+data:{ID:id,type:type,reason:reason},
+success: function(msg){
+layer.closeAll('loading');
+layer.msg(msg.msg);
+if(msg.code==1){
+$('#jinsom-admin-apply-bbs-admin-'+id+' span m').html('已经拒绝').attr('style','');
+layer.close(index);
+layer.close(admin_apply_bbs_read_form);
+}
+}
+});
+});
+}else{//删除或通过
+
+
 if(type=='agree'){
 title="通过";
-}else if(type=='refuse'){
-title="拒绝";
 }else{
 title="删除";	
 }
@@ -1174,14 +1203,130 @@ if(type=='del'){
 $('#jinsom-admin-apply-bbs-admin-'+id).remove();
 }else if(type=='agree'){
 $('#jinsom-admin-apply-bbs-admin-'+id+' span m').html('已经通过').attr('style','');
-}else if(type=='refuse'){
-$('#jinsom-admin-apply-bbs-admin-'+id+' span m').html('已经拒绝').attr('style','');
 }
 layer.close(admin_apply_bbs_read_form);
 }
 }
 });	
 });	
+
+
+
+
+}
+
+
+
+}
+
+//商城订单
+function jinsom_admin_shop_order_form(){
+layer.load(1);
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/admin/stencil/shop-order.php",
+success: function(msg){
+layer.closeAll('loading');
+window.admin_apply_bbs_read_form=layer.open({
+title:'订单详情',
+type: 1,
+fixed: false,
+offset: '61px',
+area: ['750px','680px'], 
+content: msg
+});
+}
+});	
+}
+
+
+
+
+//查看订单
+function jinsom_goods_order_view_form(trade_no){
+layer.load(1);
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/admin/stencil/order-view.php",
+data:{trade_no:trade_no},
+success: function(msg){
+layer.closeAll('loading');
+window.goods_order_view_form=layer.open({
+title:'订单查看',
+type: 1,
+fixed: false,
+offset: '100px',
+skin:'jinsom-goods-order-view-form',
+area: ['500px','auto'],
+resize:false,
+content: msg
+});
+}
+});
+}
+
+//发货表单
+function jinsom_goods_order_send_form(trade_no){
+layer.load(1);
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/admin/stencil/order-send.php",
+data:{trade_no:trade_no},
+success: function(msg){
+layer.closeAll('loading');
+window.goods_order_send_form=layer.open({
+title:'订单发货',
+type: 1,
+fixed: false,
+skin:'jinsom-goods-order-send-form',
+area: ['500px','auto'],
+resize:false,
+content: msg
+});
+}
+});
+}
+
+//发货
+function jinsom_goods_order_send(trade_no){
+content=$('#jinsom-goods-order-send-content').val();
+layer.load(1);
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/admin/action/order-send.php",
+data:{content:content,trade_no:trade_no},
+success: function(msg){
+layer.closeAll('loading');
+layer.msg(msg.msg);
+function c(){
+layer.close(goods_order_send_form);
+layer.close(goods_order_view_form);
+}setTimeout(c,2000);
+}
+});
+}
+
+
+//删除聊天记录
+function jinsom_goods_order_delete(trade_no){
+layer.confirm('你确定要删除该订单？',{
+btn: ['确定','取消'],
+btnAlign: 'c',
+},
+function(){
+layer.load(1);
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/admin/action/order-delete.php",
+data:{trade_no:trade_no},
+success: function(msg){
+layer.closeAll('loading');
+layer.msg(msg.msg);
+$('.order-'+trade_no).remove();
+layer.close(goods_order_view_form);
+}
+});
+});
 }
 
 
