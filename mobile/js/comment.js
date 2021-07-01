@@ -1,16 +1,17 @@
 
 //评论内容
-function jinsom_comment(post_id,ticket,randstr){
+function jinsom_comment(post_id,reload,ticket,randstr){
 content=$('#jinsom-comment-content-'+post_id).val();
 img='';
 img_html='';
-if($('#jinsom-publish-images-list li').length>0){
+img_count=$('#jinsom-publish-images-list li').length;
+if(img_count>0){
 $('#jinsom-publish-images-list li').each(function(){
 img+=$(this).children('a').attr('href')+',';
 img_html+='<a data-fancybox="gallery-new" href="'+$(this).children('a').attr('href')+'">'+$(this).children('a').html()+'</a>';
 });
 img=img.substr(0,img.length-1);
-img_html='<div class="jinsom-comment-image-list clear">'+img_html+'</div>';
+img_html='<div class="jinsom-comment-image-list number-'+img_count+' clear">'+img_html+'</div>';
 }
 
 myApp.showIndicator();
@@ -25,6 +26,11 @@ comment_list=$('.jinsom-single-comment-list-'+post_id);
 
 
 if(msg.code==1){//成功
+reload=parseInt(reload);
+if(reload){
+layer.open({content:msg.msg,skin:'msg',time:2});
+function d(){window.open(msg.url,'_self');}setTimeout(d,1500);
+}else{
 $('#jinsom-comment-content-'+post_id).val('');//清空内容
 history.back(-1);
 function c(){layer.open({content:msg.msg,skin:'msg',time:2});}setTimeout(c,300);
@@ -35,7 +41,7 @@ comment_list.html('');
 
 comment_num=$('.jinsom-post-'+post_id+' .footer .comment_number');
 comment_num.html(parseInt(comment_num.html())+1); 
-$('.jinsom-post-'+post_id).next('.jinsom-single-comment').children('.header').find('span').html(parseInt(comment_num.html()));
+//$('.jinsom-post-'+post_id).next('.jinsom-single-comment').children('.header').find('span').html(parseInt(comment_num.html()));
 $('.jinsom-post-'+post_id).parent().prev().find('.number').html(parseInt(comment_num.html())+'条评论');
 
 comment_list.prepend('\
@@ -59,6 +65,7 @@ comment_list.prepend('\
 </div>\
 ');
 jinsom_lightbox();
+}
 
 }else if(msg.code==2){//没有绑定手机号
 layer.open({content:msg.msg,skin:'msg',time:2});
@@ -66,6 +73,9 @@ myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page
 }else if(msg.code==3){//打开开通会员页面
 layer.open({content:msg.msg,skin:'msg',time:2});
 function c(){myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/mywallet/recharge-vip.php'});}setTimeout(c,1500);
+}else if(msg.code==4){//绑定邮箱
+layer.open({content:msg.msg,skin:'msg',time:2});
+myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/setting/setting-email.php'});
 }else{
 layer.open({content:msg.msg,skin:'msg',time:2});
 }
@@ -79,13 +89,14 @@ function jinsom_bbs_comment(post_id,bbs_id,ticket,randstr){
 content=$('#jinsom-comment-content-'+post_id).val();
 img='';
 img_html='';
-if($('#jinsom-publish-images-list li').length>0){
+img_count=$('#jinsom-publish-images-list li').length;
+if(img_count>0){
 $('#jinsom-publish-images-list li').each(function(){
 img+=$(this).children('a').attr('href')+',';
 img_html+='<a data-fancybox="gallery-new" href="'+$(this).children('a').attr('href')+'">'+$(this).children('a').html()+'</a>';
 });
 img=img.substr(0,img.length-1);
-img_html='<div class="jinsom-comment-image-list clear">'+img_html+'</div>';
+img_html='<div class="jinsom-comment-image-list number-'+img_count+' clear">'+img_html+'</div>';
 }
 
 
@@ -158,6 +169,9 @@ myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page
 }else if(msg.code==3){//打开开通会员页面
 layer.open({content:msg.msg,skin:'msg',time:2});
 function c(){myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/mywallet/recharge-vip.php'});}setTimeout(c,1500);
+}else if(msg.code==4){//绑定邮箱
+layer.open({content:msg.msg,skin:'msg',time:2});
+myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/setting/setting-email.php'});
 }else{
 layer.open({content:msg.msg,skin:'msg',time:2});
 }
@@ -227,6 +241,9 @@ myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page
 }else if(msg.code==3){//打开开通会员页面
 layer.open({content:msg.msg,skin:'msg',time:2});
 function c(){myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/mywallet/recharge-vip.php'});}setTimeout(c,1500);
+}else if(msg.code==4){//绑定邮箱
+layer.open({content:msg.msg,skin:'msg',time:2});
+myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/setting/setting-email.php'});
 }else{
 layer.open({content:msg.msg,skin:'msg',time:2});
 }

@@ -94,18 +94,32 @@ layer.alert(data.version)
 
 
 
-// 回车搜索
+//设置页回车搜索
 $(".jinsom-panel-search input").keypress(function(e) {  
 if(e.which == 13) {  
 return false;
 }  
 }); 
 
-
-layui.use('element', function() {
-var element = layui.element
+//layui模块引入
+layui.use('element',function(){
+var element=layui.element
 })
+
+//用户列表筛选
+jinsom_user_type_el=$('[name="jinsom_user_type"]');
+jinsom_user_type_el.change(function(){
+jinsom_user_type_el.val(jQuery(this).val());
 });
+
+});//ready
+
+
+
+
+// =================================函数开始
+
+
 
 //退出登录
 function jinsom_login_out(){
@@ -156,19 +170,29 @@ function c(){window.location.reload();}setTimeout(c,2000);
 //metabox导出备份
 function jinsom_amdin_backup_metabox(){
 post_id=jinsom_getUrlParam('post');
-window.open(jinsom.theme_url+"/module/admin/action/admin-setting-metabox-back.php?download&post_id="+post_id);
+if(!post_id){
+alert('请新建页面之后再进行导出数据操作！');
+return false;
+}
+type=$('.components-select-control__input').val();
+window.open(jinsom.theme_url+"/module/admin/action/admin-setting-metabox-back.php?download&post_id="+post_id+"&type="+type);
 }
 
 
 //metabox导入备份
 function jinsom_amdin_backup_metabox_import(){
+post_id=jinsom_getUrlParam('post');
+if(!post_id){
+alert('请新建页面之后再进行导入数据操作！');
+return false;
+}
+type=$('.components-select-control__input').val();
 backup=$('#jinsom-admin-backup-metabox-val').val();
 if(backup=='delete'){
 title='你要确定要清空所有的设置选项吗？清空之后将恢复默认设置！';
 }else{
 title='你确定要导入备份设置吗？你之前的设置选项会被覆盖！';
 }
-post_id=jinsom_getUrlParam('post');
 layer.confirm(title,{
 btnAlign: 'c',
 }, function(){
@@ -176,7 +200,7 @@ layer.load(1);
 $.ajax({
 type:"POST",
 url: jinsom.jinsom_ajax_url+"/admin/action/admin-setting-metabox-back.php",
-data:{backup:backup,post_id:post_id},
+data:{backup:backup,post_id:post_id,type:type},
 success: function(msg){
 layer.closeAll('loading');
 layer.msg(msg.msg);
@@ -1330,14 +1354,111 @@ layer.close(goods_order_view_form);
 }
 
 
+
+//举报表单
+function jinsom_admin_report_form(){
+layer.load(1);
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/admin/stencil/report.php",
+success: function(msg){
+layer.closeAll('loading');
+layer.open({
+title:'举报列表',
+type: 1,
+fixed: false,
+area: ['700px','410px'], 
+content: msg
+});
+}
+});	
+}
+
+//查看举报详情表单
+function jinsom_admin_report_read_form(id){
+layer.load(1);
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/admin/stencil/report-read.php",
+data:{id:id},
+success: function(msg){
+layer.closeAll('loading');
+window.admin_report_read_form=layer.open({
+title:'举报详情',
+type: 1,
+fixed: false,
+area: ['500px','350px'], 
+content: msg
+});
+}
+});	
+}
+
+//举报操作
+function jinsom_admin_report_do(type,id,obj){
+
+if(type=='do'){
+title="你确定要标记为处理吗？";
+}else{
+title="你确定要删除吗？";	
+}
+
+layer.confirm(title,{
+btn: ['确定','取消'],
+btnAlign: 'c',
+},
+function(){
+
+layer.load(1);
+$.ajax({
+type: "POST",
+url:jinsom.jinsom_ajax_url+"/admin/action/report-do.php",
+data:{ID:id,type:type},
+success: function(msg){
+layer.closeAll('loading');
+layer.msg(msg.msg);
+if(msg.code==1){
+if(type=='del'){
+$('#jinsom-admin-report-'+id).remove();
+}else if(type=='do'){
+$('#jinsom-admin-report-'+id+' span m').html('已经处理').attr('style','');
+}
+layer.close(admin_report_read_form);
+}
+}
+});	
+});	
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function jinsom_no(){
 layer.msg("还没有写好啦！预留接口");	
 }
 
 
-
+//获取get参数
 function jinsom_getUrlParam(name){
 var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
 var r = window.location.search.substr(1).match(reg);
 if(r!=null)return  unescape(r[2]); return null;
 }
+
+

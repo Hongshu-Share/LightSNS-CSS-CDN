@@ -13,6 +13,16 @@ onAjaxStart: function (xhr) {
 myApp.showIndicator();
 },
 onAjaxComplete: function (xhr) {
+if(xhr.status!=200){
+layer.open({
+content: '请求失败，请重新尝试！',
+btn: '确定',
+shadeClose: false,
+yes: function(){
+layer.closeAll();
+}
+});	
+}
 myApp.hideIndicator();
 }
 });
@@ -22,9 +32,8 @@ myApp.hideIndicator();
 //强制登录
 if(jinsom.login_on_off&&!jinsom.is_login){
 myApp.loginScreen();
-}
-
-
+myApp.addView('#jinsom-view-sns-0',{dynamicNavbar:true,domCache:true});
+}else{
 
 mobile_tab=$.parseJSON(jinsom.mobile_tab);//获取移动端开启的页面类型
 if(mobile_tab){
@@ -42,6 +51,22 @@ myApp.addView('#jinsom-view-'+mobile_tab_type+'-'+i,{dynamicNavbar:true,domCache
 }//for
 }//if
 
+}
+
+//通过外链打开首页tab
+if(jinsom_get_para('tab')!=''){
+myApp.showTab('#'+jinsom_get_para('tab'));
+// window.history.pushState(null,null,'/');
+}
+
+
+if(jinsom.is_login&&jinsom.phone_on_off&&!jinsom.is_phone){
+myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/setting/setting-phone.php?author_id='+jinsom.user_id});
+}
+if(jinsom.is_login&&jinsom.email_on_off&&!jinsom.is_email){
+myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/setting/setting-email.php?author_id='+jinsom.user_id});
+}
+
 
 //判断页面属性
 if(jinsom.is_single){
@@ -53,6 +78,10 @@ myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page
 }else if(jinsom.post_reprint){
 function b(){
 myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/post-words.php?post_id='+jinsom.post_id+'&url='+jinsom.post_url});
+}setTimeout(b,500);
+}else if(jinsom.wp_post_type=='goods'){
+function b(){
+myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/post-goods.php?post_id='+jinsom.post_id+'&url='+jinsom.post_url+'&rand='+Math.random().toString(36).substr(2,5)});
 }setTimeout(b,500);
 }else if(jinsom.post_type){
 function c(){
@@ -66,9 +95,14 @@ myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page
 }
 
 if(jinsom.is_page){
+search_para=jinsom_get_para('search');
 window.history.pushState(null,null,'/');
 function e(){
-myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/post-page.php?post_id='+jinsom.post_id+'&page_template='+jinsom.page_template+'&url='+jinsom.post_url});	
+if(jinsom.page_template=='page/select.php'){//筛选
+myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/post-page.php?post_id='+jinsom.post_id+'&page_template='+jinsom.page_template+'&url='+jinsom.post_url+'&search='+search_para});
+}else{
+myApp.getCurrentView().router.load({url:jinsom.theme_url+'/mobile/templates/page/post-page.php?post_id='+jinsom.post_id+'&page_template='+jinsom.page_template+'&url='+jinsom.post_url});
+}	
 }setTimeout(e,500);	
 }
 

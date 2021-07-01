@@ -20,7 +20,7 @@ $('.jinsom-mobile-home-sns-top').hide();
 
 
 //与我相关-消除红点
-$("body").on("click",'.jinsom-chat-user-list li', function(e){
+$("body").on("click",'.jinsom-chat .jinsom-chat-user-list li,.jinsom-notice-tips-content .jinsom-chat-user-list li', function(e){
 $(this).find('.item-media').find('span').remove();
 });
 
@@ -38,16 +38,77 @@ $('.jinsom-right-bar').removeClass('right-bar-hidden');
 
 //点击底部tab返回顶部
 $(document).on('click','.tabbar a.active',function(){
-console.log('aaa');
+// console.log('aaa');
 if($('.view.active .page-content').scrollTop()>100){
 $('.view.active .page-content').animate({scrollTop:0},200);	
 if($('.jinsom-home-menu li.on').length>0){
+if($('.jinsom-home-menu li.on').attr('waterfall')!=1){
 type=$('.jinsom-home-menu li.on').attr('type');
-jinsom_post(type,'pull',this);
+jinsom_post(type,'pull','.jinsom-home-menu li.on');
+}
 }
 
 jinsom_index_notice_js_load();
 
 }
 }); 
+
+
+
+//自动滑动菜单
+$(document).on('click','.jinsom-home-menu li,.jinsom-member-menu li,.jinsom-topic-menu li,.jinsom-bbs-menu li,.jinsom-bbs-tab-post-header>li',function(){
+menu_width=0;
+for(var i=0;i<$(this).index();i++){
+menu_width+=$(this).parent().children('li').eq(i).outerWidth(true);
+}
+$(this).parent().animate({
+scrollLeft:menu_width-$(window).width()/2+$(this).outerWidth()
+});
+});
+
+
+
+
+//ajax错误/超时
+$.ajaxSetup({
+timeout: 18000,//18秒
+error: function(XHR, Status, Error){
+console.log(Status)
+myApp.hideIndicator();
+$('.jinsom-load-post').remove();
+if(Status=="error"){//发生错误
+console.log('页面请求失败，请重新尝试！');
+// layer.open({
+// content: '页面请求失败，请重新尝试！',
+// btn: '确定',
+// shadeClose: false,
+// yes: function(){
+// layer.closeAll();
+// }
+// });
+}else if(Status=="timeout"){//超时处理
+layer.open({
+content: '页面请求超时，请重新尝试！',
+btn: '确定',
+shadeClose: false,
+yes: function(){
+layer.closeAll();
+}
+});
+}else if(Status=="abort"){//中断
+console.log('操作中断！');
+}else{//其他情况
+console.log('页面请求发生未知错误，请重新尝试！');
+// layer.open({
+// content: '页面请求发生未知错误，请重新尝试！',
+// btn: '确定',
+// shadeClose: false,
+// yes: function(){
+// layer.closeAll();
+// }
+// });
+}
+}
+});
+
 });

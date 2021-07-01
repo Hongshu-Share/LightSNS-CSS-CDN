@@ -143,17 +143,6 @@ layer.close(index);
 
 //编辑动态
 function jinsom_editor_words(post_id,obj){
-if($(obj).parent().siblings('#jinsom-pop-title').length>0){
-if($.trim($(obj).parent().siblings('#jinsom-pop-title').val())==''){
-layer.msg('请输入标题！');
-return false;
-}
-}
-
-if($.trim($(obj).parent().siblings('.content').children('#jinsom-pop-content').val())==''){
-layer.msg('请输入内容！');
-return false;	
-}
 
 power=$(obj).parent().siblings('#jinsom-pop-power').val();
 if(power==1||power==2||power==4||power==5){
@@ -219,18 +208,6 @@ function d(){window.location.href=msg.url;}setTimeout(d,2000);
 
 //编辑视频
 function jinsom_editor_video(post_id){
-
-if($('#jinsom-pop-title').length>0){
-if($.trim($('#jinsom-pop-title').val())==''){
-layer.msg('请输入标题！');
-return false;
-}
-}
-
-if($.trim($("#jinsom-pop-content").val())==''){
-layer.msg('请输入内容！');
-return false;	
-}
 
 power=$('#jinsom-pop-power').val();
 if(power==1){
@@ -366,18 +343,6 @@ function d(){window.location.href=msg.url;}setTimeout(d,2000);
 //编辑音乐
 function jinsom_editor_music(post_id){
 
-if($('#jinsom-pop-title').length>0){
-if($.trim($('#jinsom-pop-title').val())==''){
-layer.msg('请输入标题！');
-return false;
-}
-}
-
-if($.trim($("#jinsom-pop-content").val())==''){
-layer.msg('请输入内容！');
-return false;	
-}
-
 power=$('#jinsom-pop-power').val();
 if(power==1){
 if($('.jinsom-publish-words-power-content .price').val()==''){
@@ -437,7 +402,7 @@ function d(){window.location.href=msg.url;}setTimeout(d,2000);
 
 
 
-//发布帖子
+//编辑帖子
 function jinsom_editor_bbs_post(post_id){
 title= $.trim($('.jinsom-bbs-title').val());
 post_type= $('#jinsom-bbs-type').val();

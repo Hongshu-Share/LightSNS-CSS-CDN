@@ -17,12 +17,13 @@ if($('.jinsom-chat-windows-loading').length>0){
 return false;
 }
 $(obj).children('.jinsom-chat-list-tips').remove();//移除提醒
-
+layer.load(1);
 $.ajax({
 type: "POST",
 url:jinsom.module_url+"/chat/chat-info.php",
 data: {author_id:user_id,type:'one'},
 success: function(msg){
+layer.closeAll('loading');
 if(msg.code==1){
 count=msg.count;
 status=msg.status;	
@@ -63,7 +64,7 @@ jinsom_stop_user_Ajax();//关闭窗口时，终止前一个ajax；
 },
 content: 
 '<div class="jinsom-chat-message-list" data-no-instant></div>'+
-'<div class="jinsom-chat-windows-footer">'+
+'<div class="jinsom-chat-windows-footer"><div class="jinsom-msg-tips" onclick=\'jinsom_im_tips(this,"one")\'>底部</div>'+
 '<div class="jinsom-chat-windows-footer-bar one clear">'+
 '<span onclick=\'jinsom_smile(this,"im","")\' class="jinsom-icon smile jinsom-weixiao-"></span>'+
 '<span class="image jinsom-icon jinsom-tupian1"></span>'+
@@ -106,6 +107,18 @@ $(".jinsom-chat-message-list-content img").on('load',function(){
 $('.jinsom-chat-message-list').scrollTop($('.jinsom-chat-message-list')[0].scrollHeight);
 } );
 
+
+$('.jinsom-chat-message-list').scroll(function(){
+contentH =$(this).get(0).scrollHeight;//内容高度
+scrollTop =$(this).scrollTop();//滚动高度
+// console.log(contentH-scrollTop);
+if(contentH-scrollTop>700){
+$('.jinsom-msg-tips').show();
+}else{
+$('.jinsom-msg-tips').hide();	
+}
+});
+
 jinsom_ajax_get_messages();//发起长轮询
 
 }
@@ -117,6 +130,9 @@ layer.msg(msg.msg);
 }
 }
 });//获取IM聊天信息
+
+
+
 
 
 }
@@ -142,7 +158,7 @@ audio = document.getElementById('jinsom-im-music');
 audio.play();
 $('.jinsom-chat-user-window .jinsom-chat-windows-user-header').attr('count',msg.count);
 $('.jinsom-chat-content-recent-user').children('li[data-id="'+user_id+'"]').attr('data-count',msg.count);
-$('.jinsom-chat-message-list').scrollTop($('.jinsom-chat-message-list')[0].scrollHeight);
+$('.jinsom-chat-user-window .jinsom-msg-tips').show().html('新消息');
 jinsom_ajax_get_messages();
 }else if(msg.code==3){//超时
 }else if(msg.code==5){
@@ -179,12 +195,13 @@ if($('.jinsom-chat-windows-group-loading').length>0){
 return false;
 }
 
-
+layer.load(1);
 $.ajax({
 type: "POST",
 url:jinsom.module_url+"/chat/chat-info.php",
 data: {bbs_id:bbs_id,type:'group'},
 success: function(msg){
+layer.closeAll('loading');
 if(msg.code==1){
 notice=msg.notice;
 name=msg.name;
@@ -231,7 +248,7 @@ jinsom_stop_group_Ajax();//关闭窗口时，终止前一个ajax；
 content: 
 '<div class="jinsom-chat-windows-left">'+
 '<div class="jinsom-chat-message-group-list" data-no-instant></div>'+
-'<div class="jinsom-chat-windows-footer">'+
+'<div class="jinsom-chat-windows-footer"><div class="jinsom-msg-tips" onclick=\'jinsom_im_tips(this,"group")\'>底部</div>'+
 '<div class="jinsom-chat-windows-footer-bar group clear">'+
 '<span onclick=\'jinsom_smile(this,"im","")\' class="jinsom-icon smile jinsom-weixiao-"></span>'+
 '<span class="image jinsom-icon jinsom-tupian1"></span>'+
@@ -294,6 +311,17 @@ $(".jinsom-chat-message-list-content img").on('load',function(){
 $('.jinsom-chat-message-group-list').scrollTop($('.jinsom-chat-message-group-list')[0].scrollHeight);
 } );
 
+$('.jinsom-chat-message-group-list').scroll(function(){
+contentH =$(this).get(0).scrollHeight;//内容高度
+scrollTop =$(this).scrollTop();//滚动高度
+console.log(contentH-scrollTop);
+if(contentH-scrollTop>700){
+$('.jinsom-msg-tips').show();
+}else{
+$('.jinsom-msg-tips').hide();	
+}
+});
+
 jinsom_ajax_get_messages_group();//发起长轮询
 
 
@@ -341,11 +369,17 @@ $('.jinsom-chat-message-group-list').append(msg.msg);
 // audio = document.getElementById('audio');
 // audio.play();
 $('.jinsom-chat-group-window .jinsom-chat-windows-user-header').attr('count',msg.count);
-$('.jinsom-chat-message-group-list').scrollTop($('.jinsom-chat-message-group-list')[0].scrollHeight);
-function c(){
-$('.jinsom-chat-message-group-list').scrollTop($('.jinsom-chat-message-group-list')[0].scrollHeight);
+// $('.jinsom-chat-group-window .jinsom-msg-tips').show().html('新消息');
+
+// $('.jinsom-chat-message-group-list').scroll(function(){
+contentH =$('.jinsom-chat-message-group-list').get(0).scrollHeight;//内容高度
+scrollTop =$('.jinsom-chat-message-group-list').scrollTop();//滚动高度
+console.log(contentH-scrollTop);
+if(contentH-scrollTop>300){
+$('.jinsom-chat-group-window .jinsom-msg-tips').show().html('新消息');
 }
-setTimeout(c,300);
+// });
+
 jinsom_ajax_get_messages_group();
 }else if(msg.code==3){//不存在参数
 }else{
@@ -400,18 +434,21 @@ return false;
 
 //加入群聊
 function jinsom_join_group_chat(bbs_id,obj){
+if(!jinsom.is_login){
+jinsom_pop_login_style();	
+return false;
+}
 if(jinsom.is_black){
 layer.msg('你是黑名单用户，禁止互动操作！');	
 return false;
 }
-this_dom=obj;
-$(this_dom).html('<i class="fa fa-spinner fa-spin"></i> 进入中...');
+$(obj).html('<i class="fa fa-spinner fa-spin"></i> 进入中...');
 $.ajax({
 type: "POST",
 url:jinsom.module_url+"/jinsom-join-group-chat.php",
 data: {bbs_id:bbs_id},
 success: function(msg){
-$(this_dom).html('加入群聊');
+$(obj).html('加入群聊');
 if(msg==1){
 jinsom_open_group_chat(bbs_id);
 }else if(msg==2){
@@ -438,7 +475,7 @@ if(smile_add_arr){
 content_a=content.replace(/\[s\-(\d+)\]/g,'<img src="'+jinsom.smile_url+smile_add_arr[0]['smile_url']+'/$1.png" class="wp-smiley">');
 content_a=content_a.replace(/\[s\-(\d+)\-(\d+)\]/g,function(){var args=arguments;return '<img src="'+jinsom.smile_url+smile_add_arr[(args[1]-1)]['smile_url']+'/'+args[2]+'.png" class="wp-smiley">'});
 }
-$('.jinsom-chat-message-list').append('<li class="myself"><div class="jinsom-chat-message-list-user-info">'+jinsom.avatar+'</div><div class="jinsom-chat-message-list-content">'+content_a+'</div></li>');
+$('.jinsom-chat-message-list').append('<li class="myself"><div class="jinsom-chat-message-list-user-info avatarimg-'+jinsom.user_id+'">'+jinsom.avatar+'</div><div class="jinsom-chat-message-list-content">'+content_a+'</div></li>');
 $('.jinsom-chat-textarea').val('');
 $('.jinsom-chat-message-list').scrollTop($('.jinsom-chat-message-list')[0].scrollHeight);
 $.ajax({
@@ -477,7 +514,7 @@ if(smile_add_arr){
 content_a=content.replace(/\[s\-(\d+)\]/g,'<img src="'+jinsom.smile_url+smile_add_arr[0]['smile_url']+'/$1.png" class="wp-smiley">');
 content_a=content_a.replace(/\[s\-(\d+)\-(\d+)\]/g,function(){var args=arguments;return '<img src="'+jinsom.smile_url+smile_add_arr[(args[1]-1)]['smile_url']+'/'+args[2]+'.png" class="wp-smiley">'});
 }
-$('.jinsom-chat-message-group-list').append('<li class="myself"><div class="jinsom-chat-message-list-user-info">'+jinsom.avatar+'</div><div class="jinsom-chat-message-list-content">'+content_a+'</div></li>');
+$('.jinsom-chat-message-group-list').append('<li class="myself"><div class="jinsom-chat-message-list-user-info avatarimg-'+jinsom.user_id+'">'+jinsom.avatar+'</div><div class="jinsom-chat-message-list-content">'+content_a+'</div></li>');
 $('.jinsom-chat-textarea-group').val('');
 $('.jinsom-chat-message-group-list').scrollTop($('.jinsom-chat-message-group-list')[0].scrollHeight);
 $.ajax({
@@ -514,7 +551,7 @@ layer.load(1);
 done: function(res, index, upload){
 layer.closeAll('loading');
 if(res.code == 1){
-$('.jinsom-chat-message-list').append('<li class="myself"><div class="jinsom-chat-message-list-user-info">'+jinsom.avatar+'</div><div class="jinsom-chat-message-list-content">'+res.img+'</div></li>');
+$('.jinsom-chat-message-list').append('<li class="myself"><div class="jinsom-chat-message-list-user-info avatarimg-'+jinsom.user_id+'">'+jinsom.avatar+'</div><div class="jinsom-chat-message-list-content">'+res.img+'</div></li>');
 $('.jinsom-chat-message-list').scrollTop($('.jinsom-chat-message-list')[0].scrollHeight);
 //图片加载完毕执行
 $(".jinsom-chat-message-list-content img").on('load',function(){
@@ -548,7 +585,7 @@ layer.load(1);
 done: function(res, index, upload){
 layer.closeAll('loading');
 if(res.code == 1){
-$('.jinsom-chat-message-group-list').append('<li class="myself"><div class="jinsom-chat-message-list-user-info">'+jinsom.avatar+'</div><div class="jinsom-chat-message-list-content">'+res.img+'</div></li>');
+$('.jinsom-chat-message-group-list').append('<li class="myself"><div class="jinsom-chat-message-list-user-info avatarimg-'+jinsom.user_id+'">'+jinsom.avatar+'</div><div class="jinsom-chat-message-list-content">'+res.img+'</div></li>');
 $('.jinsom-chat-message-group-list').scrollTop($('.jinsom-chat-message-group-list')[0].scrollHeight);
 //图片加载完毕执行
 $(".jinsom-chat-message-list-content img").on('load',function(){
@@ -564,4 +601,15 @@ layer.closeAll('loading');
 }
 });
 });
+}
+
+
+//下拉
+function jinsom_im_tips(obj,type){
+$(obj).hide().html('底部');
+if(type=='one'){
+$('.jinsom-chat-message-list').scrollTop($('.jinsom-chat-message-list')[0].scrollHeight);
+}else{
+$('.jinsom-chat-message-group-list').scrollTop($('.jinsom-chat-message-group-list')[0].scrollHeight);
+}
 }
